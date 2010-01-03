@@ -9,20 +9,6 @@ local options = {
             name = 'General',
             type = 'group',
             args = {
-                msg = {
-                    type = 'input',
-                    name = 'My Message',
-                    desc = 'The message for my addon',
-                    set = 'SetMyMessage',
-                    get = 'GetMyMessage',
-                },
-            }
-        },
-        
-        dummy = {
-            name = 'Dummy',
-            type = 'group',
-            args = {
                 newMacro = {
                     name = 'New',
                     type = 'input',
@@ -41,6 +27,15 @@ local options = {
                     values = {},
                     order = 20,
                 },
+                macroName = {
+                    name = 'Macro Name',
+                    type = 'input',
+                    desc = 'Macro being edited',
+                    set = 'SetMacroName',
+                    get = 'GetMacroName',
+                    width = 'full',
+                    order = 30,
+                },
                 macroEditBox = {
                     name = 'Macro Edit Box',
                     type = 'input',
@@ -49,7 +44,7 @@ local options = {
                     get = 'GetMacroBody',
                     multiline = true,
                     width = 'full',
-                    order = 30
+                    order = 32
                 },
                 createMacro = {
                     name = 'Create Macro',
@@ -57,9 +52,29 @@ local options = {
                     desc = 'Creates a macro',
                     func = 'CreateMacro',
                     order = 50,
-                },                
+                },
+                
+                blank1 = {
+                    name = '',
+                    type = 'description',
+                    order = 59
+                },
+                
+                macroDeleteBox = {
+                    name = 'Delete macro',
+                    type = 'select',
+                    desc = 'Delete a macro',
+                    set = 'SetMacroDelete',
+                    get = 'GetMacroDelete',
+                    style = 'dropdown',
+                    values = {},
+                    order = 60,
+                    confirm = true,
+                    confirmText = 'Are you sure you wish to delete the selected macro?'
+                },
             },
         },
+        
     },
 }
 
@@ -73,6 +88,7 @@ local defaults = {
 MMMunch.inCombat = nil
 MMMunch.defaultMacroBody = "#showtooltip"
 MMMunch.selectedMacro = nil
+MMMunch.selectedMacroName = ""
 MMMunch.selectedMacroBody = ""
 
 local PT = LibStub("LibPeriodicTable-3.1")
@@ -92,7 +108,6 @@ function MMMunch:OnInitialize()
     
     -- Create Interface Config Options
     LibStub("AceConfigDialog-3.0"):AddToBlizOptions("MMMunch", "MuchMoreMunch", nil, "general")
-    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("MMMunch", "Dummy", "MuchMoreMunch", "dummy")
     LibStub("AceConfigDialog-3.0"):AddToBlizOptions("MMMunch", "Profile", "MuchMoreMunch", "profile")
     
     -- Populate lists
@@ -196,90 +211,153 @@ function MMMunch:SortPriority(subset)
     return subset
 end
 
-function MMMunch:GetMacroBody(info)
-    return self.selectedMacroBody
+
+-- Config dialog UI
+function MMMunch:GetNewMacro(info)
+    return ""
 end
 
-function MMMunch:SetMacroBody(info, body)
-    local name = options.args.dummy.args.macroSelectBox.values[self.selectedMacro]
-    --self.db.profile.macroTable[self.selectedMacro][1] = name
-    self.db.profile.macroTable[self.selectedMacro][2] = body
+function MMMunch:SetNewMacro(info, name)
+    local body = self.defaultMacroBody
+    self.db.profile.macroTable[name] = body
+    self:UpdateMacroList()
+    
+    self:UpdateDisplayedMacro(name)
+end
 
-    self.selectedMacroBody = body
-    self:Printf("Set selected macro body: %s", name)   
+function MMMunch:UpdateDisplayedMacro(name)
+    self.selectedMacro = self:GetMacroListKeyByName(name)
+    self.selectedMacroName = name
+    self.selectedMacroBody = self.db.profile.macroTable[name]
 end
 
 function MMMunch:GetSelectMacro(info)
     if self.selectedMacro then
-        self:Printf("Get selected macro: %s", options.args.dummy.args.macroSelectBox.values[self.selectedMacro])
-        
-        return options.args.dummy.args.macroSelectBox.values[self.selectedMacro]
+        self:Printf("Get selected macro: %s", self.selectedMacroName)
+        return self.selectedMacro
     end
     return nil
 end
 
 function MMMunch:SetSelectMacro(info, key)
+    -- Update contents of macro edit box
+    local name = options.args.general.args.macroSelectBox.values[key] 
+    local body = self.db.profile.macroTable[name]
+
     self.selectedMacro = key
-    local name = options.args.dummy.args.macroSelectBox.values[self.selectedMacro]
-    local body = self.db.profile.macroTable[self.selectedMacro][2]
-    self:SetMacroBody(info, body)
+    self.selectedMacroName = name
+    self.selectedMacroBody = body
+
     self:Printf("Set selected macro: %s", name)    
 end
 
-function MMMunch:GetNewMacro(info)
+function MMMunch:GetMacroName(info)
+    if self.selectedMacro == nil then
+        options.args.general.args.macroName.disabled = true
+    else
+        options.args.general.args.macroName.disabled = false
+    end
+
+    return self.selectedMacroName
 end
 
-function MMMunch:SetNewMacro(info, name)
-    local body = self.defaultMacroBody
-    local macroID = self:GenerateMacro(name, body)
+function MMMunch:SetMacroName(info, name)
+    -- Grabs the macro text stored under the old name and stores it under the new name
+    local body = self.db.profile.macroTable[self.selectedMacroName]
+    self.db.profile.macroTable[name] = body
     
-    -- Check if name has been used before
-    
-    if macroID then
-        table.insert(self.db.profile.macroTable, {name, body})
-        self:Print("Macro created")
-    else
-        self:Print("Macro could not be generated")
-    end
-    
+    -- Erases the old name and sets the new name as the selection
+    self.db.profile.macroTable[self.selectedMacroName] = nil
     self:UpdateMacroList()
+    self:UpdateDisplayedMacro(name)
+end
+
+function MMMunch:GetMacroBody(info)
+    if self.selectedMacro == nil then
+        options.args.general.args.macroEditBox.disabled = true
+    else
+        options.args.general.args.macroEditBox.disabled = false
+    end
+        
+    self:Print("Get selected macro body")    
+    return self.selectedMacroBody
+end
+
+function MMMunch:SetMacroBody(info, body)
+    self.db.profile.macroTable[self.selectedMacroName] = body
+
+    self.selectedMacroBody = body
+    self:Printf("Set selected macro body: %s", self.selectedMacroName)   
 end
 
 function MMMunch:UpdateMacroList()
     local macroList = {}
-    for i, macro in ipairs(self.db.profile.macroTable) do
-        table.insert(macroList, macro[1])
+    for name, body in pairs(self.db.profile.macroTable) do
+        table.insert(macroList, name)
     end
     
-    options.args.dummy.args.macroSelectBox.values = macroList
+    table.sort(macroList)
+    options.args.general.args.macroSelectBox.values = macroList
+    options.args.general.args.macroDeleteBox.values = macroList
+end
+
+function MMMunch:GetMacroListKeyByName(name)
+    local index = nil
+    
+    for i, macroName in ipairs(options.args.general.args.macroSelectBox.values) do
+        if macroName == name then
+            index = i
+            break
+        end
+    end
+    
+    return index
+end
+
+function MMMunch:CreateMacro()
+    local name = self.selectedMacroName
+    local body = self.selectedMacroBody
+    local macroID = self:GenerateMacro(name,body)
+    if macroID then 
+        PickupMacro(macroID)
+    end
 end
 
 function MMMunch:GenerateMacro(name,body)
-   
     if not self.inCombat then 
         local macroID = GetMacroIndexByName(name)
-        
         if macroID == 0 then 
             macroID = CreateMacro(name, 1, body, nil, 1)
         else
             macroID = EditMacro(macroID, name, 1, body, 1, nil)
         end
         
-        self:Print("Create Macro Here")
-        
+        self:Print("Macro created")
         return macroID
     end
-    
+
+    self:Print("Macro could not be generated")    
     return nil
 end
 
-function MMMunch:CreateMacro(name,body)
-    name = "myMacro"
-    body = "#showtooltip"
-    local macroID = self:GenerateMacro(name,body)
-    if macroID then 
-        PickupMacro(macroID)
+function MMMunch:GetMacroDelete(info)
+    return nil
+end
+
+function MMMunch:SetMacroDelete(info,key)
+    local name = options.args.general.args.macroDeleteBox.values[key] 
+    self.db.profile.macroTable[name] = nil
+
+    if self.selectedMacro == key then 
+        self.selectedMacro = nil
+        self.selectedMacroName = nil
+        self.selectedMacroBody = nil
     end
+
+    self:Printf("Deleted macro: %s", name)    
+    self:UpdateMacroList()
+    
+    -- Add code for deleting any macro buttons by that name
 end
 
 -----------------------
@@ -290,6 +368,6 @@ function MMMunch:Test()
     
     self:SortPriority(subset)
     
-    self:Printf("itemID: %d, priority: %d, setname: %s", subset[1][1], subset[1][2], subset[1][3])
-    self:Printf("itemID: %d, priority: %d, setname: %s", subset[2][1], subset[2][2], subset[2][3])
+    --self:Printf("itemID: %d, priority: %d, setname: %s", subset[1][1], subset[1][2], subset[1][3])
+    --self:Printf("itemID: %d, priority: %d, setname: %s", subset[2][1], subset[2][2], subset[2][3])
 end
