@@ -46,20 +46,7 @@ local options = {
                     width = 'full',
                     order = 32
                 },
-                createMacro = {
-                    name = 'Create Macro',
-                    type = 'execute',
-                    desc = 'Creates a macro',
-                    func = 'CreateMacro',
-                    order = 50,
-                },
-                
-                blank1 = {
-                    name = '',
-                    type = 'description',
-                    order = 59
-                },
-                
+
                 macroDeleteBox = {
                     name = 'Delete macro',
                     type = 'select',
@@ -68,10 +55,40 @@ local options = {
                     get = 'GetMacroDelete',
                     style = 'dropdown',
                     values = {},
-                    order = 60,
+                    order = 40,
                     confirm = true,
                     confirmText = 'Are you sure you wish to delete the selected macro?'
                 },
+                
+                previewHeader = {
+                    name = 'Preview',
+                    type = 'header',
+                    order = 50,
+                },
+                
+                previewBody = {
+                    name = '\n\n\n\n\n',
+                    type = 'description',
+                    order = 60,
+                },
+                
+                blank1 = {
+                    name = '',
+                    type = 'header',
+                    order = 100
+                },
+                
+                createMacro = {
+                    name = 'Create Macro',
+                    type = 'execute',
+                    desc = 'Creates a macro',
+                    func = 'CreateMacro',
+                    disabled = true,
+                    order = 110,
+                    width = 'full',
+                },
+                
+                
             },
         },
         
@@ -218,76 +235,72 @@ function MMMunch:GetNewMacro(info)
 end
 
 function MMMunch:SetNewMacro(info, name)
+    if strtrim(name) == "" then return end
+    
     local body = self.defaultMacroBody
     self.db.profile.macroTable[name] = body
     self:UpdateMacroList()
     
-    self:UpdateDisplayedMacro(name)
+    self.selectedMacroName = name
+    self:UpdateDisplayedMacro()
 end
 
-function MMMunch:UpdateDisplayedMacro(name)
+function MMMunch:UpdateDisplayedMacro()
+    name = self.selectedMacroName
     self.selectedMacro = self:GetMacroListKeyByName(name)
-    self.selectedMacroName = name
-    self.selectedMacroBody = self.db.profile.macroTable[name]
+    if self.selectedMacro then 
+        self.selectedMacroBody = self.db.profile.macroTable[name]
+        options.args.general.args.macroName.disabled = false
+        options.args.general.args.macroEditBox.disabled = false
+        options.args.general.args.previewBody.name = self:ProcessMacro()
+        options.args.general.args.createMacro.disabled = false
+    else
+        self.selectedMacroName = nil
+        self.selectedMacroBody = nil
+        options.args.general.args.macroName.disabled = true
+        options.args.general.args.macroEditBox.disabled = true
+        options.args.general.args.previewBody.name = '\n\n\n\n\n'
+        options.args.general.args.createMacro.disabled = true
+    end
 end
 
 function MMMunch:GetSelectMacro(info)
-    if self.selectedMacro then
-        self:Printf("Get selected macro: %s", self.selectedMacroName)
-        return self.selectedMacro
-    end
-    return nil
+    return self.selectedMacro
 end
 
 function MMMunch:SetSelectMacro(info, key)
     -- Update contents of macro edit box
-    local name = options.args.general.args.macroSelectBox.values[key] 
-    local body = self.db.profile.macroTable[name]
-
-    self.selectedMacro = key
+    local name = options.args.general.args.macroSelectBox.values[key]
     self.selectedMacroName = name
-    self.selectedMacroBody = body
-
-    self:Printf("Set selected macro: %s", name)    
+    self:UpdateDisplayedMacro()
 end
 
 function MMMunch:GetMacroName(info)
-    if self.selectedMacro == nil then
-        options.args.general.args.macroName.disabled = true
-    else
-        options.args.general.args.macroName.disabled = false
-    end
-
     return self.selectedMacroName
 end
 
 function MMMunch:SetMacroName(info, name)
+    if strtrim(name) == "" then return end
+    
     -- Grabs the macro text stored under the old name and stores it under the new name
     local body = self.db.profile.macroTable[self.selectedMacroName]
     self.db.profile.macroTable[name] = body
     
     -- Erases the old name and sets the new name as the selection
     self.db.profile.macroTable[self.selectedMacroName] = nil
+    self.selectedMacroName = name
     self:UpdateMacroList()
-    self:UpdateDisplayedMacro(name)
+    self:UpdateDisplayedMacro()
 end
 
 function MMMunch:GetMacroBody(info)
-    if self.selectedMacro == nil then
-        options.args.general.args.macroEditBox.disabled = true
-    else
-        options.args.general.args.macroEditBox.disabled = false
-    end
-        
-    self:Print("Get selected macro body")    
     return self.selectedMacroBody
 end
 
 function MMMunch:SetMacroBody(info, body)
     self.db.profile.macroTable[self.selectedMacroName] = body
-
     self.selectedMacroBody = body
-    self:Printf("Set selected macro body: %s", self.selectedMacroName)   
+    self:UpdateDisplayedMacro()
 end
 
 function MMMunch:UpdateMacroList()
@@ -312,6 +325,10 @@ function MMMunch:GetMacroListKeyByName(name)
     end
     
     return index
+end
+
+function MMMunch:ProcessMacro()
+    return self.selectedMacroBody
 end
 
 function MMMunch:CreateMacro()
@@ -348,14 +365,8 @@ function MMMunch:SetMacroDelete(info,key)
     local name = options.args.general.args.macroDeleteBox.values[key] 
     self.db.profile.macroTable[name] = nil
 
-    if self.selectedMacro == key then 
-        self.selectedMacro = nil
-        self.selectedMacroName = nil
-        self.selectedMacroBody = nil
-    end
-
-    self:Printf("Deleted macro: %s", name)    
     self:UpdateMacroList()
+    self:UpdateDisplayedMacro()
     
     -- Add code for deleting any macro buttons by that name
 end
