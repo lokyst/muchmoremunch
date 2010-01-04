@@ -439,7 +439,7 @@ function MMMunch:SubPatternFunc(subTable)
         local bits = {strsplit(",", chunk)}
         local subbedString = ""
         for i, bit in ipairs(bits) do
-            local itemID = subTable[bit]
+            local itemID = subTable[strtrim(bit)]
             if itemID then
                 if #subbedString > 0 then
                     subbedString = subbedString .. ", "
