@@ -152,6 +152,10 @@ function MMMunch:OnInitialize()
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnPlayerLeaveCombat")
     self:RegisterBucketEvent("BAG_UPDATE", 0.5, "OnBagUpdate")
     
+    self.db.RegisterCallback(self, "OnProfileChanged", "RefreshConfig")
+    self.db.RegisterCallback(self, "OnProfileCopied", "RefreshConfig")    
+    self.db.RegisterCallback(self, "OnProfileReset", "RefreshConfig")
+    
     -- Create Interface Config Options
     local ACD = LibStub("AceConfigDialog-3.0")
     ACD:AddToBlizOptions("MMMunch", "MuchMoreMunch", nil, "general")
@@ -513,4 +517,17 @@ function MMMunch:UpdateBlizzMacros()
             self:GenerateMacro(name, body, false, macroID)
         end
     end
+end
+
+
+
+-- Profile Handling
+function MMMunch:RefreshConfig()
+    self:UpdateMacroList()
+    if not self.inCombat then 
+        self:UpdateBlizzMacros()
+    else
+        self.delayedMacroUpdate = true
+    end
+    self:UpdateDisplayedMacro()
 end
