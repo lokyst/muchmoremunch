@@ -12,6 +12,7 @@
     <Include file="Libs\AceDBOptions-3.0\AceDBOptions-3.0.xml"/>
     
     <Include file="Libs\AceEvent-3.0\AceEvent-3.0.xml"/>
+    <Include file="Libs\AceBucket-3.0\AceBucket-3.0.xml"/>
     
     <Script file="libs\LibPeriodicTable-3.1\LibPeriodicTable-3.1.lua"/>
     <Script file="libs\LibPeriodicTable-3.1-Consumable\LibPeriodicTable-3.1-Consumable.lua"/>

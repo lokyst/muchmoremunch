@@ -1,4 +1,31 @@
-MMMunch = LibStub("AceAddon-3.0"):NewAddon("MMMunch", "AceConsole-3.0", "AceEvent-3.0")
+MMMunch = LibStub("AceAddon-3.0"):NewAddon("MMMunch", "AceConsole-3.0", "AceEvent-3.0", "AceBucket-3.0")
+
+local PLACEHOLDER_CATEGORIES = {
+    hpp = {"Consumable.Potion.Recovery.Healing.Basic"},
+    mpp = {"Consumable.Potion.Recovery.Mana.Basic"},
+    hps = {"Consumable.Warlock.Healthstone"},
+    mps = {},
+    hpf = {
+        "Consumable.Food.Edible.Combo.Conjured",
+        "Consumable.Food.Edible.Basic.Conjured",
+        "Consumable.Food.Edible.Basic.Non-Conjured",
+        "Consumable.Food.Edible.Combo",
+    },
+    mpf = {
+        "Consumable.Food.Edible.Combo.Conjured",
+        "Consumable.Water.Conjured",
+        "Consumable.Water.Basic",
+        "Consumable.Food.Combo Mana",
+    },
+    b = {"Consumable.Bandage.Basic"},
+}
+
+local PT_SETS = {}
+for _, categories in pairs(PLACEHOLDER_CATEGORIES) do
+    for _, category in ipairs(categories) do
+        table.insert(PT_SETS, category)
+    end
+end
 
 local options = {
     name = "MuchMoreMunch",
@@ -102,30 +129,34 @@ local defaults = {
     },
 }
 
-MMMunch.inCombat = nil
-MMMunch.defaultMacroBody = "#showtooltip"
-MMMunch.selectedMacro = nil
-MMMunch.selectedMacroName = ""
-MMMunch.selectedMacroBody = ""
-
 local PT = LibStub("LibPeriodicTable-3.1")
-
-MMMunch:RegisterChatCommand("mmm", "Test")
 
 function MMMunch:OnInitialize()
   -- Code that you want to run when the addon is first loaded goes here.
     self.db = LibStub("AceDB-3.0"):New("MMMunchDB", defaults)
     options.args.profile = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
-    LibStub("AceConfig-3.0"):RegisterOptionsTable("MMMunch", options, {"mmmunch"})
+    LibStub("AceConfig-3.0"):RegisterOptionsTable("MMMunch", options, nil)
+
+    -- initialize flags
+    self.inCombat = nil
+    self.defaultMacroBody = "#showtooltip\n/use <hpp>;"
+    self.selectedMacro = nil
+    self.selectedMacroName = ""
+    self.selectedMacroBody = ""
+    self.delayedMacroUpdate = false
     
     -- Register events
-    MMMunch:RegisterEvent("PLAYER_LOGIN", "OnPlayerLogin")
-    MMMunch:RegisterEvent("PLAYER_REGEN_DISABLED", "OnPlayerEnterCombat")
-    MMMunch:RegisterEvent("PLAYER_REGEN_ENABLED", "OnPlayerLeaveCombat")
+    self:RegisterEvent("PLAYER_LOGIN", "OnPlayerLogin")
+    self:RegisterEvent("PLAYER_REGEN_DISABLED", "OnPlayerEnterCombat")
+    self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnPlayerLeaveCombat")
+    self:RegisterBucketEvent("BAG_UPDATE", 0.5, "OnBagUpdate")
     
     -- Create Interface Config Options
-    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("MMMunch", "MuchMoreMunch", nil, "general")
-    LibStub("AceConfigDialog-3.0"):AddToBlizOptions("MMMunch", "Profile", "MuchMoreMunch", "profile")
+    local ACD = LibStub("AceConfigDialog-3.0")
+    ACD:AddToBlizOptions("MMMunch", "MuchMoreMunch", nil, "general")
+    ACD:AddToBlizOptions("MMMunch", "Profile", "MuchMoreMunch", "profile")
+    
+    MMMunch:RegisterChatCommand("mmm", function() InterfaceOptionsFrame_OpenToCategory("MuchMoreMunch") end)
     
     -- Populate lists
     self:UpdateMacroList()
@@ -139,17 +170,9 @@ function MMMunch:OnDisable()
     -- Called when the addon is disabled
 end
 
-function MMMunch:GetMyMessage(info)
-    self:Print("Hello, get function!")
-    return self.myMessageVar
-end
-
-function MMMunch:SetMyMessage(info, input)
-    self.myMessageVar = input
-    self:Print("Hello, set function!")
-end
-
 function MMMunch:OnPlayerLogin()
+    self.itemList = self:BagScan()
+    self:UpdateBlizzMacros()
 end
 
 function MMMunch:OnPlayerEnterCombat()
@@ -158,6 +181,20 @@ end
 
 function MMMunch:OnPlayerLeaveCombat()
     self.inCombat = false
+    if self.delayedMacroUpdate == true then
+        self:UpdateBlizzMacros()
+        self.delayedMacroUpdate = false
+    end
+end
+
+function MMMunch:OnBagUpdate()
+    self.itemList = self:BagScan()
+    if not self.inCombat then 
+        self:UpdateBlizzMacros()
+    else
+        self.delayedMacroUpdate = true
+    end
+    self:UpdateDisplayedMacro()
 end
 
 function MMMunch:ItemIdFromLink(itemLink)
@@ -171,16 +208,53 @@ function MMMunch:ItemIdFromLink(itemLink)
     return nil
 end
 
-local PT_SETS = {
-    "Consumable.Potion.Recovery.Healing.Basic",
-    "Consumable.Potion.Recovery.Mana.Basic",
-    "Consumable.Warlock.Healthstone",
-    "Consumable.Water.Basic",
-    "Consumable.Water.Conjured",
-    "Consumable.Food.Edible.Basic",
-    "Consumable.Food.Edible.Combo",
-    "Consumable.Bandage.Basic",
-}
+function MMMunch:CreateSubTable()
+    local subTable = {}
+    
+    for placeHolder, categories in pairs(PLACEHOLDER_CATEGORIES) do
+        local bestItem = nil
+        
+        for i, category in ipairs(categories) do
+            local items = self:ExtractSubset(self.itemList, category)
+            bestItem = self:FindBestItem(items, bestItem, category)
+        end
+        
+        if bestItem ~= nil then 
+            subTable[placeHolder] = bestItem.itemID
+        end
+
+    end
+
+    return subTable
+end
+
+function MMMunch:FindBestItem(items, best, category)
+    for i, item in ipairs(items) do
+        item = {
+            itemID = item.itemID,
+            value = item.setValues[category],
+            count = item.count,
+            isConjured = item.isConjured,
+            isCombo = item.isCombo,
+        }
+        if best == nil then
+            best = item
+        else
+            if (item.value > best.value)
+                or (item.value == best.value and item.isConjured)
+                or (item.value == best.value
+                        and item.count < best.count
+                        and (not best.isConjured)
+                        and (not item.isCombo)
+                        and (item.isCombo and best.isCombo)) then
+                
+                best = item
+            end
+        end
+    end
+    
+    return best
+end
 
 function MMMunch:BagScan()
     local itemList = {}
@@ -190,17 +264,38 @@ function MMMunch:BagScan()
         for slotID = 1, numberOfSlots do
             local itemID = MMMunch:ItemIdFromLink(GetContainerItemLink(bagID, slotID))
             if itemID then
-            
                 for i, set in ipairs(PT_SETS) do
+                    -- check if the item belongs to this set
+                    local value = PT:ItemInSet(itemID, set)
                     
-                    local priority, setname = PT:ItemInSet(itemID, set)
-                    if priority or setname then
-                        --self:Printf("bagID: %d, slotID: %d, itemID: %d, priority: %s, setname: %s", bagID, slotID, itemID, priority, setname)
-                        table.insert(itemList, {itemID, tonumber(priority), setname})
-                        break
+                    -- if it does, add it to the table of items for this set
+                    if value then
+                        local count = GetItemCount(itemID)
+                        local item = itemList[itemID]
+                        
+                        if item == nil then
+                            -- create the item object
+                            item = {
+                                itemID = itemID,
+                                setValues = {[set]=tonumber(value)},
+                                count = count,
+                                isConjured = (string.find(set, "Conjured") ~= nil
+                                            and string.find(set, "Non-Conjured") == nil),
+                                isCombo = (string.find(set, "Combo") ~= nil),
+                            }
+                            itemList[itemID] = item
+                        else
+                            -- add this set and its value to the item object
+                            item.setValues[set] = tonumber(value)
+                            item.isConjured = item.isConjured
+                                or (string.find(set, "Conjured") ~= nil
+                                    and string.find(set, "Non-Conjured") == nil)
+                            item.isCombo = item.isCombo
+                                or (string.find(set, "Combo") ~= nil)
+                        end
                     end
+                    
                 end
-                
             end
         end
     end
@@ -208,25 +303,18 @@ function MMMunch:BagScan()
     return itemList
 end
 
-function MMMunch:ExtractSubset(itemList,category)
+function MMMunch:ExtractSubset(itemList, category)
     local subset = {}
     
-    for i, itemInfo in ipairs(itemList) do
-        local itemID, priority, setname = itemInfo[1], itemInfo[2], itemInfo[3]
-        
-        if string.find(setname, category) == 1 then
-            table.insert(subset, itemInfo)
+    for itemID, item in pairs(itemList) do
+        if PT:ItemInSet(itemID, category) then
+            table.insert(subset, item)
         end
     end
-    
+        
     return subset
 end
 
-function MMMunch:SortPriority(subset)
-    table.sort(subset, function(a,b) return a[2]>b[2] end)
-    
-    return subset
-end
 
 
 -- Config dialog UI
@@ -252,7 +340,7 @@ function MMMunch:UpdateDisplayedMacro()
         self.selectedMacroBody = self.db.profile.macroTable[name]
         options.args.general.args.macroName.disabled = false
         options.args.general.args.macroEditBox.disabled = false
-        options.args.general.args.previewBody.name = self:ProcessMacro()
+        options.args.general.args.previewBody.name = self:ProcessMacro(self.selectedMacroBody)
         options.args.general.args.createMacro.disabled = false
     else
         self.selectedMacroName = nil
@@ -301,6 +389,11 @@ function MMMunch:SetMacroBody(info, body)
     self.db.profile.macroTable[self.selectedMacroName] = body
     self.selectedMacroBody = body
     self:UpdateDisplayedMacro()
+    if not self.inCombat then
+        self:GenerateMacro(self.selectedMacroName, body, false)
+    else
+        self.delayedMacroUpdate = true
+    end
 end
 
 function MMMunch:UpdateMacroList()
@@ -327,41 +420,67 @@ function MMMunch:GetMacroListKeyByName(name)
     return index
 end
 
-function MMMunch:ProcessMacro()
-    return self.selectedMacroBody
+
+
+-- Macro Processing
+function MMMunch:ProcessMacro(body)
+    local subTable = self:CreateSubTable()
+    return self:SubPlaceHolders(body, subTable)
+end
+
+local PLACEHOLDER_PATTERN = "<([%l,%s]+)>"
+
+function MMMunch:SubPlaceHolders(template, subTable)
+    return string.gsub(template, PLACEHOLDER_PATTERN, self:SubPatternFunc(subTable))
+end
+
+function MMMunch:SubPatternFunc(subTable)
+    return function (chunk)
+        local bits = {strsplit(",", chunk)}
+        local subbedString = ""
+        for i, bit in ipairs(bits) do
+            local itemID = subTable[bit]
+            if itemID then
+                if #subbedString > 0 then
+                    subbedString = subbedString .. ", "
+                end
+                subbedString = subbedString .. "item:".. itemID
+            end
+        end
+        
+        return subbedString
+    end
 end
 
 function MMMunch:CreateMacro()
     local name = self.selectedMacroName
     local body = self.selectedMacroBody
-    local macroID = self:GenerateMacro(name,body)
+    local macroID = nil
+    if not self.inCombat then     
+        macroID = self:GenerateMacro(name, body, true)
+    end
+    
     if macroID then 
         PickupMacro(macroID)
     end
 end
 
-function MMMunch:GenerateMacro(name,body)
-    if not self.inCombat then 
-        local macroID = GetMacroIndexByName(name)
-        if macroID == 0 then 
-            macroID = CreateMacro(name, 1, body, nil, 1)
-        else
-            macroID = EditMacro(macroID, name, 1, body, 1, nil)
-        end
-        
-        self:Print("Macro created")
-        return macroID
-    end
+function MMMunch:GenerateMacro(name, body, create, macroID)
+    if not macroID then macroID = GetMacroIndexByName(name) end
 
-    self:Print("Macro could not be generated")    
-    return nil
+    if macroID == 0 and create then 
+        macroID = CreateMacro(name, 1, self:ProcessMacro(body), nil, 1)
+    else
+        macroID = EditMacro(macroID, name, 1, self:ProcessMacro(body), 1, nil)
+    end
+    return macroID
 end
 
 function MMMunch:GetMacroDelete(info)
     return nil
 end
 
-function MMMunch:SetMacroDelete(info,key)
+function MMMunch:SetMacroDelete(info, key)
     local name = options.args.general.args.macroDeleteBox.values[key] 
     self.db.profile.macroTable[name] = nil
 
@@ -369,16 +488,19 @@ function MMMunch:SetMacroDelete(info,key)
     self:UpdateDisplayedMacro()
     
     -- Add code for deleting any macro buttons by that name
+    DeleteMacro(name)
 end
 
------------------------
-function MMMunch:Test()
-    local itemList = self:BagScan()
-    local category = "Consumable.Potion.Recovery.Healing"
-    local subset = self:ExtractSubset(itemList, category)
+-- Process actual macros in Blizz macro interface
+function MMMunch:UpdateBlizzMacros()
+    local globalMacroCount, _ = GetNumMacros()
     
-    self:SortPriority(subset)
-    
-    --self:Printf("itemID: %d, priority: %d, setname: %s", subset[1][1], subset[1][2], subset[1][3])
-    --self:Printf("itemID: %d, priority: %d, setname: %s", subset[2][1], subset[2][2], subset[2][3])
+    for macroID = 1, globalMacroCount do
+        local name, _, _, _ = GetMacroInfo(macroID)
+        local body = self.db.profile.macroTable[name]
+        if not (body == nil) then
+            -- we've found a match and we want to update it
+            self:GenerateMacro(name, body, false, macroID)
+        end
+    end
 end

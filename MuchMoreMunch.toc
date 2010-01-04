@@ -4,7 +4,7 @@
 ## Author: lokyst
 ## Version: 0.1
 ## SavedVariables: MMMunchDB
-## OptionalDeps: LibPeriodicTable-3.1
+## OptionalDeps: LibPeriodicTable-3.1, Blizzard_DebugTools
 ## X-Embeds: LibPeriodicTable-3.1
 
 embeds.xml
