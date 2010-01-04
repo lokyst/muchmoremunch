@@ -144,6 +144,7 @@ function MMMunch:OnInitialize()
     self.selectedMacroName = ""
     self.selectedMacroBody = ""
     self.delayedMacroUpdate = false
+    self.tagString = "\n#MMM"
     
     -- Register events
     self:RegisterEvent("PLAYER_LOGIN", "OnPlayerLogin")
@@ -469,10 +470,15 @@ function MMMunch:GenerateMacro(name, body, create, macroID)
     if not macroID then macroID = GetMacroIndexByName(name) end
 
     if macroID == 0 and create then 
-        macroID = CreateMacro(name, 1, self:ProcessMacro(body), nil, 1)
-    else
-        macroID = EditMacro(macroID, name, 1, self:ProcessMacro(body), 1, nil)
+        macroID = CreateMacro(name, 1, self:ProcessMacro(body) .. self.tagString, nil, 1)
+    elseif macroID > 0 then 
+        if string.find(tostring(GetMacroBody(macroID)), self.tagString) then
+            macroID = EditMacro(macroID, name, 1, self:ProcessMacro(body) .. self.tagString, 1, nil)
+        else
+            self:Printf("Blizzard macro update aborted: An unrecognised macro called %s already exists. Please rename your macro.", name)
+        end
     end
+    
     return macroID
 end
 
@@ -488,7 +494,9 @@ function MMMunch:SetMacroDelete(info, key)
     self:UpdateDisplayedMacro()
     
     -- Add code for deleting any macro buttons by that name
-    DeleteMacro(name)
+    if string.find(tostring(GetMacroBody(name)), self.tagString) then
+        DeleteMacro(name)
+    end
 end
 
 -- Process actual macros in Blizz macro interface
