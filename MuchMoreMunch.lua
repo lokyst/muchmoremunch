@@ -471,8 +471,9 @@ function MMMunch:GenerateMacro(name, body, create, macroID)
 
     if macroID == 0 and create then 
         macroID = CreateMacro(name, 1, self:ProcessMacro(body) .. self.tagString, nil, 1)
-    elseif macroID > 0 then 
-        if string.find(tostring(GetMacroBody(macroID)), self.tagString) then
+    elseif macroID > 0 then
+        local macroBody = GetMacroBody(macroID)
+        if string.find(tostring(macroBody), self.tagString) then
             macroID = EditMacro(macroID, name, 1, self:ProcessMacro(body) .. self.tagString, 1, nil)
         else
             self:Printf("Blizzard macro update aborted: An unrecognised macro called %s already exists. Please rename your macro.", name)
@@ -494,7 +495,8 @@ function MMMunch:SetMacroDelete(info, key)
     self:UpdateDisplayedMacro()
     
     -- Add code for deleting any macro buttons by that name
-    if string.find(tostring(GetMacroBody(name)), self.tagString) then
+    local macroBody = GetMacroBody(name)
+    if string.find(tostring(macroBody), self.tagString) then
         DeleteMacro(name)
     end
 end
