@@ -173,7 +173,6 @@ end
 
 function MMMunch:OnPlayerLogin()
     self.itemList = self:BagScan()
-    self:UpdateBlizzMacros()
 end
 
 function MMMunch:OnPlayerEnterCombat()
