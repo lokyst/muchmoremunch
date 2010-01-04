@@ -4,7 +4,7 @@ local PLACEHOLDER_CATEGORIES = {
     hpp = {"Consumable.Potion.Recovery.Healing.Basic"},
     mpp = {"Consumable.Potion.Recovery.Mana.Basic"},
     hps = {"Consumable.Warlock.Healthstone"},
-    mps = {},
+    mps = {"Consumable.Cooldown.Stone.Mana.Mana Stone"},
     hpf = {
         "Consumable.Food.Edible.Combo.Conjured",
         "Consumable.Food.Edible.Basic.Conjured",
@@ -66,7 +66,7 @@ local options = {
                 macroEditBox = {
                     name = 'Macro Text',
                     type = 'input',
-                    desc = 'Edit your macro. Valid placeholders are:\n\n<hpp> - health potions\n<mpp> - mana potions\n<hpf> - health food\n<mpf> - mana food\n<b> - bandage\n',
+                    desc = 'Edit your macro. Valid placeholders are:\n\n<hpp> - health potions\n<hps> - healthstones\n<mpp> - mana potions\n<mps> - mana gems\n<hpf> - health food\n<mpf> - mana food\n<b> - bandage\n',
                     set = 'SetMacroBody',
                     get = 'GetMacroBody',
                     multiline = true,
