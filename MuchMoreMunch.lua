@@ -45,9 +45,9 @@ local options = {
                     order = 10,
                 },
                 macroSelectBox = {
-                    name = 'Macro Selection Box',
+                    name = 'Existing Macros',
                     type = 'select',
-                    desc = 'Select the macro to edit',
+                    desc = 'Select a macro to edit',
                     set = 'SetSelectMacro',
                     get = 'GetSelectMacro',
                     style = 'dropdown',
@@ -64,9 +64,9 @@ local options = {
                     order = 30,
                 },
                 macroEditBox = {
-                    name = 'Macro Edit Box',
+                    name = 'Macro Text',
                     type = 'input',
-                    desc = 'Edit your macro',
+                    desc = 'Edit your macro. Valid placeholders are:\n\n<hpp> - health potions\n<mpp> - mana potions\n<hpf> - health food\n<mpf> - mana food\n<b> - bandage\n',
                     set = 'SetMacroBody',
                     get = 'GetMacroBody',
                     multiline = true,
@@ -77,7 +77,7 @@ local options = {
                 macroDeleteBox = {
                     name = 'Delete macro',
                     type = 'select',
-                    desc = 'Delete a macro',
+                    desc = 'Select a macro to be deleted',
                     set = 'SetMacroDelete',
                     get = 'GetMacroDelete',
                     style = 'dropdown',
@@ -88,7 +88,7 @@ local options = {
                 },
                 
                 previewHeader = {
-                    name = 'Preview',
+                    name = 'Preview Macro',
                     type = 'header',
                     order = 50,
                 },
@@ -108,7 +108,7 @@ local options = {
                 createMacro = {
                     name = 'Create Macro',
                     type = 'execute',
-                    desc = 'Creates a macro',
+                    desc = 'Creates a macro that can be dragged onto your action bar',
                     func = 'CreateMacro',
                     disabled = true,
                     order = 110,
