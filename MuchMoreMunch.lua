@@ -258,12 +258,13 @@ end
 
 function MMMunch:BagScan()
     local itemList = {}
+    local playerLevel = UnitLevel("player")
 
     for bagID = 0, NUM_BAG_SLOTS do
         local numberOfSlots = GetContainerNumSlots(bagID)
         for slotID = 1, numberOfSlots do
             local itemID = MMMunch:ItemIdFromLink(GetContainerItemLink(bagID, slotID))
-            if itemID then
+            if itemID and (playerLevel >= select(5, GetItemInfo(itemID))) then
                 for i, set in ipairs(PT_SETS) do
                     -- check if the item belongs to this set
                     local value = PT:ItemInSet(itemID, set)
