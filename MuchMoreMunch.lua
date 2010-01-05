@@ -512,12 +512,9 @@ function MMMunch:SetMacroDelete(info, key)
 
     self:UpdateMacroList()
     self:UpdateDisplayedMacro()
-    
-    -- Add code for deleting any macro buttons by that name
-    local macroBody = GetMacroBody(name)
-    if string.find(tostring(macroBody), self.tagString) then
-        DeleteMacro(name)
-    end
+
+    -- Do not add deletion of the blizzard macro!
+    -- The action bar is tied to the macroID which changes when the macro is re-created
 end
 
 -- Process actual macros in Blizz macro interface
