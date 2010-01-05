@@ -473,7 +473,7 @@ function MMMunch:CreateMacro()
         macroID = self:GenerateMacro(name, body, true)
     end
     
-    if macroID then 
+    if macroID > 0 then 
         PickupMacro(macroID)
     end
 end
@@ -488,6 +488,7 @@ function MMMunch:GenerateMacro(name, body, create, macroID)
         if string.find(tostring(macroBody), self.tagString) then
             macroID = EditMacro(macroID, name, 1, self:ProcessMacro(body) .. self.tagString, 1, nil)
         else
+            macroID = 0
             self:Printf("Blizzard macro update aborted: An unrecognised macro called %s already exists. Please rename your macro.", name)
         end
     end
