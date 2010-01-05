@@ -1,8 +1,14 @@
 MMMunch = LibStub("AceAddon-3.0"):NewAddon("MMMunch", "AceConsole-3.0", "AceEvent-3.0", "AceBucket-3.0")
 
 local PLACEHOLDER_CATEGORIES = {
-    hpp = {"Consumable.Potion.Recovery.Healing.Basic"},
-    mpp = {"Consumable.Potion.Recovery.Mana.Basic"},
+    hpp = {
+        "Consumable.Potion.Recovery.Healing.Basic",
+        "Consumable.Potion.Recovery.Rejuvenation",
+    },
+    mpp = {
+        "Consumable.Potion.Recovery.Mana.Basic",
+        "Consumable.Potion.Recovery.Rejuvenation",
+    },
     hps = {"Consumable.Warlock.Healthstone"},
     mps = {"Consumable.Cooldown.Stone.Mana.Mana Stone"},
     hpf = {
