@@ -246,17 +246,17 @@ function MMMunch:FindBestItem(items, best, category)
         else
             if (item.value > best.value)
                 or (item.value == best.value and item.isConjured)
-                or (item.value == best.value
-                        and item.count < best.count
-                        and (not best.isConjured)
-                        and (not item.isCombo)
-                        and (item.isCombo and best.isCombo)) then
+                or ((item.value == best.value)
+                        and ((item.count < best.count)
+                            and (not best.isConjured)
+                            and ((not item.isCombo)
+                                or (best.isCombo)))) then
                 
                 best = item
             end
         end
     end
-    
+
     return best
 end
 
@@ -284,19 +284,15 @@ function MMMunch:BagScan()
                                 itemID = itemID,
                                 setValues = {[set]=tonumber(value)},
                                 count = count,
-                                isConjured = (string.find(set, "Conjured") ~= nil
-                                            and string.find(set, "Non-Conjured") == nil),
-                                isCombo = (string.find(set, "Combo") ~= nil),
+                                isConjured = self:IsConjuredCategory(set),
+                                isCombo = self:IsComboCategory(set),
                             }
                             itemList[itemID] = item
                         else
                             -- add this set and its value to the item object
                             item.setValues[set] = tonumber(value)
-                            item.isConjured = item.isConjured
-                                or (string.find(set, "Conjured") ~= nil
-                                    and string.find(set, "Non-Conjured") == nil)
-                            item.isCombo = item.isCombo
-                                or (string.find(set, "Combo") ~= nil)
+                            item.isConjured = item.isConjured or self:IsConjuredCategory(set)
+                            item.isCombo = item.isCombo or self:IsComboCategory(set)
                         end
                     end
                     
@@ -306,6 +302,18 @@ function MMMunch:BagScan()
     end
     
     return itemList
+end
+
+function MMMunch:IsConjuredCategory(category)
+    if (not(string.find(category, "Conjured")) and (string.find(category, "Non-Conjured"))) then return true end
+    
+    return false
+end
+
+function MMMunch:IsComboCategory(category)
+    if string.find(category, "Combo") then return true end
+    
+    return false
 end
 
 function MMMunch:ExtractSubset(itemList, category)
