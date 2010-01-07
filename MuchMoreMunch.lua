@@ -41,7 +41,7 @@ local PRESET_MACROS = {
     ["mFood"] = "#showtooltip\n/use <hpf>",
     ["mWater"] = "#showtooltip\n/use <mpf>",
     ["mBandage"] = "#showtooltip\n/use [@player] <b>",
-    ["mAllInOne"] = "#showtooltip\n/use [mod,@player] <b>; [nocombat] <hpf>\n/castsequence [combat] reset=combat <hps,hpp>"
+    ["mAllInOne"] = "#showtooltip\n/use [mod,@player] <b>; [nocombat] <hpf>\n/castsequence [nomod,combat] reset=combat <hps,hpp>"
 }
 
 local options = {
@@ -179,6 +179,7 @@ function MMMunch:OnInitialize()
     ACD:AddToBlizOptions("MMMunch", L["Profile"], "MuchMoreMunch", "profile")
     
     MMMunch:RegisterChatCommand("mmm", function() InterfaceOptionsFrame_OpenToCategory("MuchMoreMunch") end)
+    MMMunch:RegisterChatCommand("muchmoremunch", function() InterfaceOptionsFrame_OpenToCategory("MuchMoreMunch") end)
     
     -- Populate lists
     self:UpdateMacroList()
