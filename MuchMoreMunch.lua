@@ -41,7 +41,8 @@ local PRESET_MACROS = {
     ["mFood"] = "#showtooltip\n/use <hpf>",
     ["mWater"] = "#showtooltip\n/use <mpf>",
     ["mBandage"] = "#showtooltip\n/use [@player] <b>",
-    ["mAllInOne"] = "#showtooltip\n/use [mod,@player] <b>; [nocombat] <hpf>\n/castsequence [nomod,combat] reset=combat <hps,hpp>"
+    ["mAllHP"] = "#showtooltip\n/use [mod,@player] <b>; [nocombat] <hpf>\n/castsequence [nomod,combat] reset=combat <hps,hpp>",
+    ["mAllMP"] = "#showtooltip\n/use [nomod,nocombat] <mpf>\n/castsequence [nomod,combat] reset=combat <mps,mpp>",
 }
 
 local options = {
