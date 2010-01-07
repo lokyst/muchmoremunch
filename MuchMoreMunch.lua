@@ -1,4 +1,5 @@
 MMMunch = LibStub("AceAddon-3.0"):NewAddon("MMMunch", "AceConsole-3.0", "AceEvent-3.0", "AceBucket-3.0")
+local L = LibStub("AceLocale-3.0"):GetLocale("MMMunch", true)
 
 local PLACEHOLDER_CATEGORIES = {
     hpp = {
@@ -49,21 +50,21 @@ local options = {
     type = 'group',
     args = {
         general = {
-            name = 'General',
+            name = L['General'],
             type = 'group',
             args = {
                 newMacro = {
-                    name = 'New Macro',
+                    name = L['New Macro'],
                     type = 'input',
-                    desc = 'Create a new empty macro',
+                    desc = L['Create a new empty macro'],
                     set = 'SetNewMacro',
                     get = 'GetNewMacro',
                     order = 10,
                 },
                 macroSelectBox = {
-                    name = 'Existing Macros',
+                    name = L['Existing Macros'],
                     type = 'select',
-                    desc = 'Select a macro to edit',
+                    desc = L['Select a macro to edit'],
                     set = 'SetSelectMacro',
                     get = 'GetSelectMacro',
                     style = 'dropdown',
@@ -71,18 +72,18 @@ local options = {
                     order = 20,
                 },
                 macroName = {
-                    name = 'Macro Name',
+                    name = L['Macro Name'],
                     type = 'input',
-                    desc = 'Macro being edited',
+                    desc = L['Macro being edited'],
                     set = 'SetMacroName',
                     get = 'GetMacroName',
                     width = 'full',
                     order = 30,
                 },
                 macroEditBox = {
-                    name = 'Macro Text',
+                    name = L['Macro Text'],
                     type = 'input',
-                    desc = 'Edit your macro. Valid placeholders are:\n\n<hpp> - health potions\n<hps> - healthstones\n<mpp> - mana potions\n<mps> - mana gems\n<hpf> - health food\n<mpf> - mana food\n<b> - bandage\n\nMultiple placeholders can be combined for use in a castsequence, e.g. <hps,hpp>',
+                    desc = L['Edit your macro. Valid placeholders are:\n\n<hpp> - health potions\n<hps> - healthstones\n<mpp> - mana potions\n<mps> - mana gems\n<hpf> - health food\n<mpf> - mana food\n<b> - bandage\n\nMultiple placeholders can be combined for use in a castsequence, e.g. <hps,hpp>'],
                     set = 'SetMacroBody',
                     get = 'GetMacroBody',
                     multiline = true,
@@ -91,20 +92,20 @@ local options = {
                 },
 
                 macroDeleteBox = {
-                    name = 'Delete macro',
+                    name = L['Delete macro'],
                     type = 'select',
-                    desc = 'Select a macro to be deleted',
+                    desc = L['Select a macro to be deleted'],
                     set = 'SetMacroDelete',
                     get = 'GetMacroDelete',
                     style = 'dropdown',
                     values = {},
                     order = 40,
                     confirm = true,
-                    confirmText = 'Are you sure you wish to delete the selected macro?'
+                    confirmText = L['Are you sure you wish to delete the selected macro?']
                 },
                 
                 previewHeader = {
-                    name = 'Preview Macro',
+                    name = L['Preview Macro'],
                     type = 'header',
                     order = 50,
                 },
@@ -122,9 +123,9 @@ local options = {
                 },
                 
                 createMacro = {
-                    name = 'Create Macro',
+                    name = L['Create Macro'],
                     type = 'execute',
-                    desc = 'Creates a macro that can be dragged onto your action bar',
+                    desc = L['Creates a macro that can be dragged onto your action bar'],
                     func = 'CreateMacro',
                     disabled = true,
                     order = 110,
@@ -154,7 +155,7 @@ function MMMunch:OnInitialize()
 
     -- initialize flags
     self.inCombat = nil
-    self.defaultMacroBody = "#showtooltip\n/use <hpp>;"
+    self.defaultMacroBody = "#showtooltip\n/use <hpp>"
     self.selectedMacro = nil
     self.selectedMacroName = ""
     self.selectedMacroBody = ""
@@ -175,7 +176,7 @@ function MMMunch:OnInitialize()
     -- Create Interface Config Options
     local ACD = LibStub("AceConfigDialog-3.0")
     ACD:AddToBlizOptions("MMMunch", "MuchMoreMunch", nil, "general")
-    ACD:AddToBlizOptions("MMMunch", "Profile", "MuchMoreMunch", "profile")
+    ACD:AddToBlizOptions("MMMunch", L["Profile"], "MuchMoreMunch", "profile")
     
     MMMunch:RegisterChatCommand("mmm", function() InterfaceOptionsFrame_OpenToCategory("MuchMoreMunch") end)
     
@@ -505,7 +506,7 @@ function MMMunch:GenerateMacro(name, body, create, macroID)
             macroID = EditMacro(macroID, name, 1, self:ProcessMacro(body) .. self.tagString, 1, nil)
         else
             macroID = 0
-            self:Printf("Blizzard macro update aborted: An unrecognised macro called %s already exists. Please rename your macro.", name)
+            self:Print(L["Blizzard macro update aborted: An unrecognised macro called %s already exists. Please rename your macro."](name))
         end
     end
     
