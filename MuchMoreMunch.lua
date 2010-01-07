@@ -33,6 +33,16 @@ for _, categories in pairs(PLACEHOLDER_CATEGORIES) do
     end
 end
 
+local PRESET_MACROS = {
+    ["mHP"] = "#showtooltip\n/castsequence [nocombat] reset=120 <hps,hpp,hpp>\n"..
+              "/castsequence [combat] reset=combat <hps,hpp>",
+    ["mMP"] = "#showtooltip\n/use <mpp>",
+    ["mFood"] = "#showtooltip\n/use <hpf>",
+    ["mWater"] = "#showtooltip\n/use <mpf>",
+    ["mBandage"] = "#showtooltip\n/use [@player] <b>",
+    ["mAllInOne"] = "#showtooltip\n/use [mod,@player] <b>; [nocombat] <hpf>\n/castsequence [combat] reset=combat <hps,hpp>"
+}
+
 local options = {
     name = "MuchMoreMunch",
     handler = MMMunch,
@@ -43,7 +53,7 @@ local options = {
             type = 'group',
             args = {
                 newMacro = {
-                    name = 'New',
+                    name = 'New Macro',
                     type = 'input',
                     desc = 'Create a new empty macro',
                     set = 'SetNewMacro',
@@ -72,7 +82,7 @@ local options = {
                 macroEditBox = {
                     name = 'Macro Text',
                     type = 'input',
-                    desc = 'Edit your macro. Valid placeholders are:\n\n<hpp> - health potions\n<hps> - healthstones\n<mpp> - mana potions\n<mps> - mana gems\n<hpf> - health food\n<mpf> - mana food\n<b> - bandage\n',
+                    desc = 'Edit your macro. Valid placeholders are:\n\n<hpp> - health potions\n<hps> - healthstones\n<mpp> - mana potions\n<mps> - mana gems\n<hpf> - health food\n<mpf> - mana food\n<b> - bandage\n\nMultiple placeholders can be combined for use in a castsequence, e.g. <hps,hpp>',
                     set = 'SetMacroBody',
                     get = 'GetMacroBody',
                     multiline = true,
@@ -130,7 +140,6 @@ local options = {
 
 local defaults = {
     profile = {
-        setting = true,
         macroTable = {},
     },
 }
@@ -158,9 +167,10 @@ function MMMunch:OnInitialize()
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnPlayerLeaveCombat")
     self:RegisterBucketEvent("BAG_UPDATE", 0.5, "OnBagUpdate")
     
+    self.db.RegisterCallback(self, "OnNewProfile", "InitializePresets")
+    self.db.RegisterCallback(self, "OnProfileReset", "InitializePresets")
     self.db.RegisterCallback(self, "OnProfileChanged", "RefreshConfig")
     self.db.RegisterCallback(self, "OnProfileCopied", "RefreshConfig")    
-    self.db.RegisterCallback(self, "OnProfileReset", "RefreshConfig")
     
     -- Create Interface Config Options
     local ACD = LibStub("AceConfigDialog-3.0")
@@ -534,6 +544,13 @@ end
 
 
 -- Profile Handling
+function MMMunch:InitializePresets(db, profile)
+    for k,v in pairs(PRESET_MACROS) do
+        self.db.profile.macroTable[k] = v
+    end
+    self:RefreshConfig()
+end
+
 function MMMunch:RefreshConfig()
     self:UpdateMacroList()
     if not self.inCombat then 
