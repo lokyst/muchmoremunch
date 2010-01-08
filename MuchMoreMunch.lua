@@ -195,7 +195,7 @@ function MMMunch:OnDisable()
 end
 
 function MMMunch:OnPlayerLogin()
-    self.itemList = self:BagScan()
+    -- this space for rent
 end
 
 function MMMunch:OnPlayerEnterCombat()
@@ -205,19 +205,17 @@ end
 function MMMunch:OnPlayerLeaveCombat()
     self.inCombat = false
     if self.delayedMacroUpdate == true then
-        self:UpdateBlizzMacros()
+        self:UpdateAll()
         self.delayedMacroUpdate = false
     end
 end
 
 function MMMunch:OnBagUpdate()
-    self.itemList = self:BagScan()
-    if not self.inCombat then 
-        self:UpdateBlizzMacros()
+    if not self.inCombat then
+        self:UpdateAll()
     else
         self.delayedMacroUpdate = true
     end
-    self:UpdateDisplayedMacro()
 end
 
 function MMMunch:ItemIdFromLink(itemLink)
@@ -231,14 +229,14 @@ function MMMunch:ItemIdFromLink(itemLink)
     return nil
 end
 
-function MMMunch:CreateSubTable()
+function MMMunch:CreateSubTable(itemList)
     local subTable = {}
     
     for placeHolder, categories in pairs(PLACEHOLDER_CATEGORIES) do
         local bestItem = nil
         
         for i, category in ipairs(categories) do
-            local items = self:ExtractSubset(self.itemList, category)
+            local items = self:ExtractSubset(itemList, category)
             bestItem = self:FindBestItem(items, bestItem, category)
         end
         
@@ -321,6 +319,13 @@ function MMMunch:BagScan()
     end
     
     return itemList
+end
+
+function MMMunch:UpdateAll()
+    local itemList = self:BagScan()
+    self.subTable = self:CreateSubTable(itemList)
+    self:UpdateBlizzMacros()
+    self:UpdateDisplayedMacro()
 end
 
 function MMMunch:IsConjuredCategory(category)
@@ -456,8 +461,7 @@ end
 
 -- Macro Processing
 function MMMunch:ProcessMacro(body)
-    local subTable = self:CreateSubTable()
-    return self:SubPlaceHolders(body, subTable)
+    return self:SubPlaceHolders(body, self.subTable)
 end
 
 local PLACEHOLDER_PATTERN = "<([%l,%s]+)>"
