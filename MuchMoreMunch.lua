@@ -179,8 +179,8 @@ function MMMunch:OnInitialize()
     ACD:AddToBlizOptions("MMMunch", "MuchMoreMunch", nil, "general")
     ACD:AddToBlizOptions("MMMunch", L["Profile"], "MuchMoreMunch", "profile")
     
-    MMMunch:RegisterChatCommand("mmm", function() InterfaceOptionsFrame_OpenToCategory("MuchMoreMunch") end)
-    MMMunch:RegisterChatCommand("muchmoremunch", function() InterfaceOptionsFrame_OpenToCategory("MuchMoreMunch") end)
+    self:RegisterChatCommand("mmm", function() InterfaceOptionsFrame_OpenToCategory("MuchMoreMunch") end)
+    self:RegisterChatCommand("muchmoremunch", function() InterfaceOptionsFrame_OpenToCategory("MuchMoreMunch") end)
     
     -- Populate lists
     self:UpdateMacroList()
@@ -284,7 +284,7 @@ function MMMunch:BagScan()
     for bagID = 0, NUM_BAG_SLOTS do
         local numberOfSlots = GetContainerNumSlots(bagID)
         for slotID = 1, numberOfSlots do
-            local itemID = MMMunch:ItemIdFromLink(GetContainerItemLink(bagID, slotID))
+            local itemID = self:ItemIdFromLink(GetContainerItemLink(bagID, slotID))
             if itemID and (playerLevel >= select(5, GetItemInfo(itemID))) then
                 for i, set in ipairs(PT_SETS) do
                     -- check if the item belongs to this set
