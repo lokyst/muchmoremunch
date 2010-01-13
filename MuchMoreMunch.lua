@@ -328,8 +328,9 @@ function MMMunch:UpdateAll()
 end
 
 function MMMunch:IsConjuredCategory(category)
-    if (not(string.find(category, "Conjured")) and (string.find(category, "Non-Conjured"))) then return true end
-    
+    if string.find(category, "Conjured") and not (string.find(category, "Non%-Conjured")) then
+        return true
+    end
     return false
 end
 
