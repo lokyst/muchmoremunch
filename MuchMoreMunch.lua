@@ -284,34 +284,37 @@ function MMMunch:BagScan()
     for bagID = 0, NUM_BAG_SLOTS do
         for slotID = 1, GetContainerNumSlots(bagID) do
             local itemID = self:ItemIdFromLink(GetContainerItemLink(bagID, slotID))
-            if itemID and (playerLevel >= select(5, GetItemInfo(itemID))) then
-                for i, set in ipairs(PT_SETS) do
-                    -- check if the item belongs to this set
-                    local value = PT:ItemInSet(itemID, set)
-                    
-                    -- if it does, add it to the table of items for this set
-                    if value then
-                        local count = GetItemCount(itemID)
-                        local item = itemList[itemID]
+            if itemID then
+                local itemLevel = select(5, GetItemInfo(itemID))
+                if itemLevel and (playerLevel >= itemLevel) then
+                    for i, set in ipairs(PT_SETS) do
+                        -- check if the item belongs to this set
+                        local value = PT:ItemInSet(itemID, set)
                         
-                        if item == nil then
-                            -- create the item object
-                            item = {
-                                itemID = itemID,
-                                setValues = {[set]=tonumber(value)},
-                                count = count,
-                                isConjured = self:IsConjuredCategory(set),
-                                isCombo = self:IsComboCategory(set),
-                            }
-                            itemList[itemID] = item
-                        else
-                            -- add this set and its value to the item object
-                            item.setValues[set] = tonumber(value)
-                            item.isConjured = item.isConjured or self:IsConjuredCategory(set)
-                            item.isCombo = item.isCombo or self:IsComboCategory(set)
+                        -- if it does, add it to the table of items for this set
+                        if value then
+                            local count = GetItemCount(itemID)
+                            local item = itemList[itemID]
+                            
+                            if item == nil then
+                                -- create the item object
+                                item = {
+                                    itemID = itemID,
+                                    setValues = {[set]=tonumber(value)},
+                                    count = count,
+                                    isConjured = self:IsConjuredCategory(set),
+                                    isCombo = self:IsComboCategory(set),
+                                }
+                                itemList[itemID] = item
+                            else
+                                -- add this set and its value to the item object
+                                item.setValues[set] = tonumber(value)
+                                item.isConjured = item.isConjured or self:IsConjuredCategory(set)
+                                item.isCombo = item.isCombo or self:IsComboCategory(set)
+                            end
                         end
+                        
                     end
-                    
                 end
             end
         end
