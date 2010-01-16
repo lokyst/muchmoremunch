@@ -27,13 +27,6 @@ local PLACEHOLDER_CATEGORIES = {
     b = {"Consumable.Bandage.Basic"},
 }
 
-local PT_SETS = {}
-for _, categories in pairs(PLACEHOLDER_CATEGORIES) do
-    for _, category in ipairs(categories) do
-        table.insert(PT_SETS, category)
-    end
-end
-
 local PRESET_MACROS = {
     ["mHP"] = "#showtooltip\n/castsequence [nocombat] reset=120 <hps,hpp,hpp>\n"..
               "/castsequence [combat] reset=combat <hps,hpp>",
@@ -232,49 +225,41 @@ end
 function MMMunch:CreateSubTable(itemList)
     local subTable = {}
     
-    for placeHolder, categories in pairs(PLACEHOLDER_CATEGORIES) do
-        local bestItem = nil
-        
-        for i, category in ipairs(categories) do
-            local items = self:ExtractSubset(itemList, category)
-            bestItem = self:FindBestItem(items, bestItem, category)
+    for _, item in pairs(itemList) do
+        for itemType, _ in pairs(item.setValues) do
+            local bestItem = nil
+            local bestItemID = subTable[itemType]
+            if bestItemID then bestItem = itemList[bestItemID] end
+            
+            bestItemID = self:FindBestItem(item, bestItem, itemType)
+            
+            if bestItemID ~= nil then subTable[itemType] = bestItemID end 
         end
-        
-        if bestItem ~= nil then 
-            subTable[placeHolder] = bestItem.itemID
-        end
-
     end
 
     return subTable
 end
 
-function MMMunch:FindBestItem(items, best, category)
-    for i, item in ipairs(items) do
-        item = {
-            itemID = item.itemID,
-            value = item.setValues[category],
-            count = item.count,
-            isConjured = item.isConjured,
-            isCombo = item.isCombo,
-        }
-        if best == nil then
+function MMMunch:FindBestItem(item, best, itemType)
+    if best == nil then
+        best = item
+    else
+        local itemValue = item.setValues[itemType]
+        local bestValue = best.setValues[itemType]    
+
+        if (itemValue > bestValue)
+            or (itemValue == bestValue and item.isConjured and not(best.isConjured)) 
+            or ((itemValue == bestValue) and (best.isCombo) and (not item.isCombo) and (not best.isConjured))
+            or ((itemValue == bestValue) and (item.count < best.count)
+                and ((item.isConjured == best.isConjured) and (item.isCombo == best.isCombo)))
+            then
+            
             best = item
-        else
-            if (item.value > best.value)
-                or (item.value == best.value and item.isConjured)
-                or ((item.value == best.value)
-                        and ((item.count < best.count)
-                            and (not best.isConjured)
-                            and ((not item.isCombo)
-                                or (best.isCombo)))) then
-                
-                best = item
-            end
         end
+
     end
 
-    return best
+    return best.itemID
 end
 
 function MMMunch:BagScan()
@@ -284,36 +269,38 @@ function MMMunch:BagScan()
     for bagID = 0, NUM_BAG_SLOTS do
         for slotID = 1, GetContainerNumSlots(bagID) do
             local itemID = self:ItemIdFromLink(GetContainerItemLink(bagID, slotID))
-            if itemID then
+            -- skip this step if empty or item already found
+            if itemID and not(itemList[itemID]) then
                 local itemLevel = select(5, GetItemInfo(itemID))
                 if itemLevel and (playerLevel >= itemLevel) then
-                    for i, set in ipairs(PT_SETS) do
-                        -- check if the item belongs to this set
-                        local value = PT:ItemInSet(itemID, set)
-                        
-                        -- if it does, add it to the table of items for this set
-                        if value then
-                            local count = GetItemCount(itemID)
-                            local item = itemList[itemID]
+                    for placeholder, categories in pairs(PLACEHOLDER_CATEGORIES) do
+                        for _, set in ipairs(categories) do
+                            -- check if the item belongs to this set
+                            local value = PT:ItemInSet(itemID, set)
                             
-                            if item == nil then
-                                -- create the item object
-                                item = {
-                                    itemID = itemID,
-                                    setValues = {[set]=tonumber(value)},
-                                    count = count,
-                                    isConjured = self:IsConjuredCategory(set),
-                                    isCombo = self:IsComboCategory(set),
-                                }
-                                itemList[itemID] = item
-                            else
-                                -- add this set and its value to the item object
-                                item.setValues[set] = tonumber(value)
-                                item.isConjured = item.isConjured or self:IsConjuredCategory(set)
-                                item.isCombo = item.isCombo or self:IsComboCategory(set)
+                            -- if it does, add it to the table of items for this set
+                            if value then
+                                local count = GetItemCount(itemID)
+                                local item = itemList[itemID]
+                                
+                                if item == nil then
+                                    -- create the item object
+                                    item = {
+                                        itemID = itemID,
+                                        setValues = {[placeholder] = tonumber(value)},
+                                        count = count,
+                                        isConjured = self:IsConjuredCategory(set),
+                                        isCombo = self:IsComboCategory(set),
+                                    }
+                                    itemList[itemID] = item
+                                else
+                                    -- add this set and its value to the item object
+                                    item.setValues[placeholder] = tonumber(value)
+                                    item.isConjured = item.isConjured or self:IsConjuredCategory(set)
+                                    item.isCombo = item.isCombo or self:IsComboCategory(set)
+                                end
                             end
                         end
-                        
                     end
                 end
             end
@@ -341,18 +328,6 @@ function MMMunch:IsComboCategory(category)
     if string.find(category, "Combo") then return true end
     
     return false
-end
-
-function MMMunch:ExtractSubset(itemList, category)
-    local subset = {}
-    
-    for itemID, item in pairs(itemList) do
-        if PT:ItemInSet(itemID, category) then
-            table.insert(subset, item)
-        end
-    end
-        
-    return subset
 end
 
 
