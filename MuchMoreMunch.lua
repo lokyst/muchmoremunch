@@ -97,25 +97,25 @@ local options = {
                     confirm = true,
                     confirmText = L['Are you sure you wish to delete the selected macro?']
                 },
-                
+
                 previewHeader = {
                     name = L['Preview Macro'],
                     type = 'header',
                     order = 50,
                 },
-                
+
                 previewBody = {
                     name = '\n\n\n\n\n',
                     type = 'description',
                     order = 60,
                 },
-                
+
                 blank1 = {
                     name = '',
                     type = 'header',
                     order = 100
                 },
-                
+
                 createMacro = {
                     name = L['Create Macro'],
                     type = 'execute',
@@ -125,11 +125,11 @@ local options = {
                     order = 110,
                     width = 'full',
                 },
-                
-                
+
+
             },
         },
-        
+
     },
 }
 
@@ -155,26 +155,26 @@ function MMMunch:OnInitialize()
     self.selectedMacroBody = ""
     self.delayedMacroUpdate = false
     self.tagString = "\n#MMM"
-    
+
     -- Register events
     self:RegisterEvent("PLAYER_LOGIN", "OnPlayerLogin")
     self:RegisterEvent("PLAYER_REGEN_DISABLED", "OnPlayerEnterCombat")
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnPlayerLeaveCombat")
     self:RegisterBucketEvent("BAG_UPDATE", 0.5, "OnBagUpdate")
-    
+
     self.db.RegisterCallback(self, "OnNewProfile", "InitializePresets")
     self.db.RegisterCallback(self, "OnProfileReset", "InitializePresets")
     self.db.RegisterCallback(self, "OnProfileChanged", "RefreshConfig")
-    self.db.RegisterCallback(self, "OnProfileCopied", "RefreshConfig")    
-    
+    self.db.RegisterCallback(self, "OnProfileCopied", "RefreshConfig")
+
     -- Create Interface Config Options
     local ACD = LibStub("AceConfigDialog-3.0")
     ACD:AddToBlizOptions("MMMunch", "MuchMoreMunch", nil, "general")
     ACD:AddToBlizOptions("MMMunch", L["Profile"], "MuchMoreMunch", "profile")
-    
+
     self:RegisterChatCommand("mmm", function() InterfaceOptionsFrame_OpenToCategory("MuchMoreMunch") end)
     self:RegisterChatCommand("muchmoremunch", function() InterfaceOptionsFrame_OpenToCategory("MuchMoreMunch") end)
-    
+
     -- Populate lists
     self:UpdateMacroList()
 end
@@ -224,16 +224,16 @@ end
 
 function MMMunch:CreateSubTable(itemList)
     local subTable = {}
-    
+
     for _, item in pairs(itemList) do
         for itemType, _ in pairs(item.setValues) do
             local bestItem = nil
             local bestItemID = subTable[itemType]
             if bestItemID then bestItem = itemList[bestItemID] end
-            
+
             bestItemID = self:FindBestItem(item, bestItem, itemType)
-            
-            if bestItemID ~= nil then subTable[itemType] = bestItemID end 
+
+            if bestItemID ~= nil then subTable[itemType] = bestItemID end
         end
     end
 
@@ -245,15 +245,15 @@ function MMMunch:FindBestItem(item, best, itemType)
         best = item
     else
         local itemValue = item.setValues[itemType]
-        local bestValue = best.setValues[itemType]    
+        local bestValue = best.setValues[itemType]
 
         if (itemValue > bestValue)
-            or (itemValue == bestValue and item.isConjured and not(best.isConjured)) 
+            or (itemValue == bestValue and item.isConjured and not(best.isConjured))
             or ((itemValue == bestValue) and (best.isCombo) and (not item.isCombo) and (not best.isConjured))
             or ((itemValue == bestValue) and (item.count < best.count)
                 and ((item.isConjured == best.isConjured) and (item.isCombo == best.isCombo)))
             then
-            
+
             best = item
         end
 
@@ -277,12 +277,12 @@ function MMMunch:BagScan()
                         for _, set in ipairs(categories) do
                             -- check if the item belongs to this set
                             local value = PT:ItemInSet(itemID, set)
-                            
+
                             -- if it does, add it to the table of items for this set
                             if value then
                                 local count = GetItemCount(itemID)
                                 local item = itemList[itemID]
-                                
+
                                 if item == nil then
                                     -- create the item object
                                     item = {
@@ -306,7 +306,7 @@ function MMMunch:BagScan()
             end
         end
     end
-    
+
     return itemList
 end
 
@@ -326,7 +326,7 @@ end
 
 function MMMunch:IsComboCategory(category)
     if string.find(category, "Combo") then return true end
-    
+
     return false
 end
 
@@ -339,11 +339,11 @@ end
 
 function MMMunch:SetNewMacro(info, name)
     if strtrim(name) == "" then return end
-    
+
     local body = self.defaultMacroBody
     self.db.profile.macroTable[name] = body
     self:UpdateMacroList()
-    
+
     self.selectedMacroName = name
     self:UpdateDisplayedMacro()
 end
@@ -351,7 +351,7 @@ end
 function MMMunch:UpdateDisplayedMacro()
     name = self.selectedMacroName
     self.selectedMacro = self:GetMacroListKeyByName(name)
-    if self.selectedMacro then 
+    if self.selectedMacro then
         self.selectedMacroBody = self.db.profile.macroTable[name]
         options.args.general.args.macroName.disabled = false
         options.args.general.args.macroEditBox.disabled = false
@@ -384,11 +384,11 @@ end
 
 function MMMunch:SetMacroName(info, name)
     if strtrim(name) == "" then return end
-    
+
     -- Grabs the macro text stored under the old name and stores it under the new name
     local body = self.db.profile.macroTable[self.selectedMacroName]
     self.db.profile.macroTable[name] = body
-    
+
     -- Erases the old name and sets the new name as the selection
     self.db.profile.macroTable[self.selectedMacroName] = nil
     self.selectedMacroName = name
@@ -416,7 +416,7 @@ function MMMunch:UpdateMacroList()
     for name, body in pairs(self.db.profile.macroTable) do
         table.insert(macroList, name)
     end
-    
+
     table.sort(macroList)
     options.args.general.args.macroSelectBox.values = macroList
     options.args.general.args.macroDeleteBox.values = macroList
@@ -424,14 +424,14 @@ end
 
 function MMMunch:GetMacroListKeyByName(name)
     local index = nil
-    
+
     for i, macroName in ipairs(options.args.general.args.macroSelectBox.values) do
         if macroName == name then
             index = i
             break
         end
     end
-    
+
     return index
 end
 
@@ -461,7 +461,7 @@ function MMMunch:SubPatternFunc(subTable)
                 subbedString = subbedString .. "item:".. itemID
             end
         end
-        
+
         return subbedString
     end
 end
@@ -470,11 +470,11 @@ function MMMunch:CreateMacro()
     local name = self.selectedMacroName
     local body = self.selectedMacroBody
     local macroID = nil
-    if not self.inCombat then     
+    if not self.inCombat then
         macroID = self:GenerateMacro(name, body, true)
     end
-    
-    if macroID > 0 then 
+
+    if macroID > 0 then
         PickupMacro(macroID)
     end
 end
@@ -482,7 +482,7 @@ end
 function MMMunch:GenerateMacro(name, body, create, macroID)
     if not macroID then macroID = GetMacroIndexByName(name) end
 
-    if macroID == 0 and create then 
+    if macroID == 0 and create then
         macroID = CreateMacro(name, 1, self:ProcessMacro(body) .. self.tagString, nil, 1)
     elseif macroID > 0 then
         local macroBody = GetMacroBody(macroID)
@@ -493,7 +493,7 @@ function MMMunch:GenerateMacro(name, body, create, macroID)
             self:Print(L["Blizzard macro update aborted: An unrecognised macro called %s already exists. Please rename your macro."](name))
         end
     end
-    
+
     return macroID
 end
 
@@ -502,7 +502,7 @@ function MMMunch:GetMacroDelete(info)
 end
 
 function MMMunch:SetMacroDelete(info, key)
-    local name = options.args.general.args.macroDeleteBox.values[key] 
+    local name = options.args.general.args.macroDeleteBox.values[key]
     self.db.profile.macroTable[name] = nil
 
     self:UpdateMacroList()
@@ -515,7 +515,7 @@ end
 -- Process actual macros in Blizz macro interface
 function MMMunch:UpdateBlizzMacros()
     local globalMacroCount, _ = GetNumMacros()
-    
+
     for macroID = 1, globalMacroCount do
         local name, _, _, _ = GetMacroInfo(macroID)
         local body = self.db.profile.macroTable[name]
@@ -538,7 +538,7 @@ end
 
 function MMMunch:RefreshConfig()
     self:UpdateMacroList()
-    if not self.inCombat then 
+    if not self.inCombat then
         self:UpdateBlizzMacros()
     else
         self.delayedMacroUpdate = true
