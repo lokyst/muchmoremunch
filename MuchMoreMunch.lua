@@ -5,10 +5,12 @@ local PLACEHOLDER_CATEGORIES = {
     hpp = {
         "Consumable.Potion.Recovery.Healing.Basic",
         "Consumable.Potion.Recovery.Rejuvenation",
+        "Consumable.Potion.Recovery.Health.Anywhere",
     },
     mpp = {
         "Consumable.Potion.Recovery.Mana.Basic",
         "Consumable.Potion.Recovery.Rejuvenation",
+        "Consumable.Potion.Recovery.Mana.Anywhere",
     },
     hps = {"Consumable.Warlock.Healthstone"},
     mps = {"Consumable.Cooldown.Stone.Mana.Mana Stone"},
