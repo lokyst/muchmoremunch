@@ -447,7 +447,17 @@ end
 local PLACEHOLDER_PATTERN = "<([%l,%s]+)>"
 
 function MMMunch:SubPlaceHolders(template, subTable)
-    return string.gsub(template, PLACEHOLDER_PATTERN, self:SubPatternFunc(subTable))
+    local subFunc = self:SubPatternFunc(subTable)
+    local subCount = 0
+    for chunk in string.gmatch(template, PLACEHOLDER_PATTERN) do
+        local sub = subFunc(chunk)
+        if sub ~= "" then subCount = subCount + 1 end
+    end
+    if subCount > 0 then
+        return string.gsub(template, PLACEHOLDER_PATTERN, subFunc)
+    else
+        return nil
+    end
 end
 
 function MMMunch:SubPatternFunc(subTable)
@@ -484,12 +494,24 @@ end
 function MMMunch:GenerateMacro(name, body, create, macroID)
     if not macroID then macroID = GetMacroIndexByName(name) end
 
+    local newBody = self:ProcessMacro(body)
+    local warning = "/script DEFAULT_CHAT_FRAME:AddMessage(\"You have no suitable items.\")"
+
     if macroID == 0 and create then
-        macroID = CreateMacro(name, 1, self:ProcessMacro(body) .. self.tagString, nil, 1)
+        if newBody == nil then
+            newBody = warning
+        end
+        macroID = CreateMacro(name, 1, newBody .. self.tagString, nil, 1)
+
     elseif macroID > 0 then
         local macroBody = GetMacroBody(macroID)
+
+        if newBody == nil then
+            return 0
+        end
+
         if string.find(tostring(macroBody), self.tagString) then
-            macroID = EditMacro(macroID, name, 1, self:ProcessMacro(body) .. self.tagString, 1, nil)
+            macroID = EditMacro(macroID, name, 1, newBody .. self.tagString, 1, nil)
         else
             macroID = 0
             self:Print(L["Blizzard macro update aborted: An unrecognised macro called %s already exists. Please rename your macro."](name))
