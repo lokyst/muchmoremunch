@@ -1,7 +1,7 @@
 -- (c) 2007 Nymbia.  see LGPLv2.1.txt for full details.
 --DO NOT MAKE CHANGES TO THIS FILE BEFORE READING THE WIKI PAGE REGARDING CHANGING THESE FILES
 if not LibStub("LibPeriodicTable-3.1", true) then error("PT3 must be loaded before data") end
-LibStub("LibPeriodicTable-3.1"):AddData("Consumable", gsub("$Rev: 266 $", "(%d+)", function(n) return n+90000 end), {
+LibStub("LibPeriodicTable-3.1"):AddData("Consumable", gsub("$Rev: 292 $", "(%d+)", function(n) return n+90000 end), {
 	["Consumable.Anti-Venom"]="6452:25,6453:35,13462:60,2633:60,19440:60,12586:60,9030:60,3386:60,31437:70,25550:70",
 	["Consumable.Bandage.Basic"]="1251:66,2581:114,3530:161,3531:301,6450:400,6451:640,8544:800,8545:1104,14529:1360,14530:2000,21990:2800,21991:3400,38643:3400,38640:4100,34721:4800,34722:5800",
 	["Consumable.Bandage.Battleground.Alterac Valley"]="19307:2000",
@@ -33,9 +33,9 @@ LibStub("LibPeriodicTable-3.1"):AddData("Consumable", gsub("$Rev: 266 $", "(%d+)
 	["Consumable.Buff.Absorb.Self.Holy"]="6051:400,22847:3400",
 	["Consumable.Buff.Absorb.Self.Nature"]="6052:1800,13458:2600,22844:3400",
 	["Consumable.Buff.Absorb.Self.Shadow"]="6048:900,13459:2600,22846:3400",
-	["Consumable.Buff.Armor.Self"]="5997:50,3389:150,8951:250,13445:450,22834:550,4623:1000,13455:2000,22849:2500",
+	["Consumable.Buff.Armor.Self"]="5997:50,3389:150,8951:250,13445:450,22834:550,4623:1000,13455:2000,22849:2500,40093:3500",
 	["Consumable.Buff.Armor.Target"]="3013:65,1478:105,4421:150,10305:195,27500:240,33459:285,43467:340",
-	["Consumable.Buff.Attack Crit.Flask"]="32597:20",
+	["Consumable.Buff.Attack Crit.Flask"]="32597:20,40212:200",
 	["Consumable.Buff.Attack Damage"]="23501:10,22788:40",
 	["Consumable.Buff.Attack Power.Self"]="23989:10,22779:30,12820:35,29528:60,28102:60,49856:75,49859:75,40068:90,31679:120,9224:265",
 	["Consumable.Buff.Attack Power.Flask"]="32599:20,47499:80,22854:120,32901:120,46377:120",
@@ -71,14 +71,14 @@ LibStub("LibPeriodicTable-3.1"):AddData("Consumable", gsub("$Rev: 266 $", "(%d+)
 	["Consumable.Buff.Shadow Power"]="9264:40,22835:65",
 	["Consumable.Buff.Shield"]="23575:1000,23576:4000",
 	["Consumable.Buff.Speed.Self"]="29530:15,20081:20,2459:50,33226:14,43135:15",
-	["Consumable.Buff.Spell Crit.Self"]="22839:2,28103:24",
+	["Consumable.Buff.Spell Crit.Self"]="22839:2,28103:24,40212:200",
 	["Consumable.Buff.Spell Damage.Flask"]="32601:23,47499:47,13512:70,32900:70,22861:80,22866:80,46376:125",
-	["Consumable.Buff.Spell Damage.Self"]="6373:10,22710:10,17708:15,22778:15,9155:20,22238:23,23326:23,28103:24,29528:30,13454:35,9264:40,49857:45,49860:45,22833:55,40070:58,22835:65,22788:80,22839:120",
+	["Consumable.Buff.Spell Damage.Self"]="6373:10,22710:10,17708:15,22778:15,9155:20,22238:23,23326:23,28103:24,29528:30,13454:35,9264:40,49857:45,49860:45,22833:55,40070:58,22835:65,22788:80,22839:120,40212:200",
 	["Consumable.Buff.Spell Reflect.Self"]="20080:3",
 	["Consumable.Buff.Water Breathing"]="34076:3,37265:10,23871:30,24421:30,25539:60",
 
-	["Consumable.Buff Type.Battle"]="2454,2457,3390,3391,6373,6662,8410,8412,8949,9155,9187,9206,9224,9264,12450,12451,12460,12820,13452,13453,13454,17708,21546,22824,22825,22827,22831,22833,22835,28102,28103,28104,31679,34537,37878,39666,40068,40070,40073,40076,44325,44327,44329,44330,44331,45621",
-	["Consumable.Buff Type.Guardian"]="1177,2458,3382,3383,3388,3389,3825,3826,5997,8411,8423,8424,8827,8951,9088,9179,11563,11564,12455,12457,12458,12459,13445,13447,20004,20007,20079,20080,20081,22834,22840,22848,32062,32063,32067,32068,40072,40078,40097,40109,44328,44332",
+	["Consumable.Buff Type.Battle"]="954,955,1181,1477,1712,2289,2290,2454,2457,3012,3390,3391,4419,4424,4425,4426,6373,6662,8410,8412,8424,8949,9155,9187,9206,9224,9264,10306,10308,10309,10310,11563,12450,12451,12460,12820,13447,13452,13453,13454,17708,20007,20079,21546,22824,22825,22827,22831,22833,22835,22840,27498,27499,27501,27503,28102,28103,28104,31679,32067,33457,33458,33460,33462,34537,37091,37092,37097,37098,37878,39666,40068,40070,40072,40073,40076,40109,43463,43464,43465,43466,44325,44327,44329,44330,44331,45621",
+	["Consumable.Buff Type.Guardian"]="1177,1180,1478,1711,2458,3013,3382,3383,3388,3389,3825,3826,4421,4422,5997,8411,8423,8827,8951,9088,9179,10305,10307,10592,11564,12455,12457,12458,12459,13445,20004,20080,20081,22834,22848,23444,27500,27502,32062,32063,32068,33459,33461,37093,37094,40078,40097,43467,44328,44332",
 	["Consumable.Buff Type.Flask"]="13510,35716,13512,32766,32601,32599,13506,32900,33208,32598,22854,32600,32765,32597,32767,32898,35717,32899,22861,22851,32596,32764,13511,22853,22866,13513,32901,40079,40082,40083,40084,40404,46376,46377,46378,46379,47499",
 
 	-- NOT AUTOGENNED. These are used by AutoBar.  Please check with the AutoBar author before making major changes
@@ -115,7 +115,7 @@ LibStub("LibPeriodicTable-3.1"):AddData("Consumable", gsub("$Rev: 266 $", "(%d+)
 	["Consumable.Cooldown.Stone.Health.Statue"]="25498:8,25880:16,25881:24,25882:36,25883:50",
 	["Consumable.Cooldown.Stone.Health.Warlock"]="m,Consumable.Warlock.Healthstone,",
 	["Consumable.Cooldown.Stone.Mana.Other"]="23354:60,23386:100,31451:300,20520:1200,12662:1200",
-	["Consumable.Cooldown.Stone.Mana.Mana Stone"]="5513:600,5514:400,8007:850,8008:1100,22044:1250,33312:3415",
+	["Consumable.Cooldown.Stone.Mana.Mana Stone"]="5513:600,5514:400,8007:850,8008:1100,22044:1250,33312:3415,36799:27606",
 	["Consumable.Cooldown.Drums.Bombs"]="m,Misc.Explosives",
 	["Consumable.Cooldown.Drums.Drums"]="29528:1,29530:2,29531:3,29529:4,29532:5,49633:6,49634:7",
 	["Consumable.Cooldown.Drums.Nets"]="24268:70,24269:80,41509:83",
@@ -135,13 +135,14 @@ LibStub("LibPeriodicTable-3.1"):AddData("Consumable", gsub("$Rev: 266 $", "(%d+)
 	["Consumable.Food.Edible.Basic.Conjured"]="m,Consumable.Food.Edible.Bread.Conjured,Consumable.Food.Edible.Bread.Combo.Conjured",
 	["Consumable.Food.Edible.Basic.Non-Conjured"]="m,Consumable.Food.Edible.Bread.Basic,Consumable.Food.Edible.Cheese.Basic,Consumable.Food.Edible.Fish.Basic,Consumable.Food.Edible.Fruit.Basic,Consumable.Food.Edible.Fungus.Basic,Consumable.Food.Edible.Meat.Basic,Consumable.Food.Edible.Misc.Basic",
 	["Consumable.Food.Edible.Bonus"]="m,Consumable.Food.Edible.Bread.Bonus,Consumable.Food.Edible.Cheese.Bonus,Consumable.Food.Edible.Fish.Bonus,Consumable.Food.Edible.Fruit.Bonus,Consumable.Food.Edible.Fungus.Bonus,Consumable.Food.Edible.Meat.Bonus,Consumable.Food.Edible.Misc.Bonus",
-	["Consumable.Food.Edible.Combo.Conjured"]="m,Consumable.Food.Edible.Bread.Combo.Conjured",
+	["Consumable.Food.Edible.Combo.Conjured"]="m,Consumable.Food.Edible.Bread.Combo.Conjured,Consumable.Food.Edible.Candy.Combo.Conjured",
 	["Consumable.Food.Edible.Combo.Non-Conjured"]="m,Consumable.Food.Edible.Misc.Combo,Consumable.Food.Edible.Fungus.Combo,Consumable.Food.Edible.Fruit.Combo,Consumable.Food.Edible.Fish.Combo,Consumable.Food.Edible.Bread.Combo.Non-Conjured",
 	["Consumable.Food.Edible.Battleground.Alterac Valley.Combo"]="19301:4410",
 	["Consumable.Food.Edible.Battleground.Arathi Basin.Basic"]="20063:1074,20064:1608,20062:2148,20223:1074,20224:1608,20222:2148,20226:1074,20227:1608,20225:2148",
 	["Consumable.Food.Edible.Battleground.Warsong Gulch.Basic"]="19062:1074,19061:1608,19060:2148",
 	["Consumable.Food.Edible.Bread.Basic"]="19696:50,20857:61,4540:61,4541:243,4542:552,4544:874,16169:874,4601:1392,8950:2148,23160:2148,29394:7500,27855:4320,28486:4320,24072:243,30816:61,29449:7500,42432:13200,42428:13200,42433:13200,42778:15000,33449:13200,42431:15000,42430:13200,44609:13200,42434:15000,42429:15000,35950:15000",
 	["Consumable.Food.Edible.Bread.Combo.Conjured"]="34062:7500,43518:13200,43523:15000",
+	["Consumable.Food.Edible.Candy.Combo.Conjured"]= "65500:972,65515:1392,65516:2148,65517:4320,65499:22500",
 	["Consumable.Food.Edible.Bread.Combo.Non-Conjured"]="13724:2148,19301:4410,34780:7500",
 	["Consumable.Food.Edible.Bread.Bonus"]="2683:243,3666:552,17197:61,43490:0,33924:0",
 	["Consumable.Food.Edible.Bread.Conjured"]="1113:243,1114:552,1487:874,5349:61,8075:1392,8076:2148,22895:4320,22019:7500",
@@ -188,8 +189,8 @@ LibStub("LibPeriodicTable-3.1"):AddData("Consumable", gsub("$Rev: 266 $", "(%d+)
 
 	["Consumable.Food.Buff.Other"]="6657,12217,33866,42997,43001,43491,43492,43488,43490,33924,37452,43572",
 
-	["Consumable.Food.Combo Health"]="21071:155,21153:567,2682:294,3448:294,13724:2148,33004:2148,20031:2550,19301:4410,28112:4410,32722:2148,33053:7500,34062:7500,34780:7500,43518:13200,43523:15000,34760:15000,34761:15000,34759:15000,45932:18000",
-	["Consumable.Food.Combo Mana"]="21071:315,21153:882,2682:294,3448:294,33004:2934,13724:4410,20031:4410,19301:4410,28112:4410,32722:4410,33053:7200,34062:7200,34780:7200,43518:9180,43523:12960,34760:12960,34761:12960,34759:12960,45932:15000",
+	["Consumable.Food.Combo Health"]="21071:155,21153:567,2682:294,3448:294,65500:972,65515:1392,13724:2148,33004:2148,65516:2148,20031:2550,65517:4320,19301:4410,28112:4410,32722:2148,33053:7500,34062:7500,34780:7500,43518:13200,43523:15000,34760:15000,34761:15000,34759:15000,45932:18000,65499:22500",
+	["Consumable.Food.Combo Mana"]="21071:315,21153:882,2682:294,3448:294,65500:1494,65515:1992,33004:2934,65516:2934,65517:4200,13724:4410,20031:4410,19301:4410,28112:4410,32722:4410,33053:7200,34062:7200,34780:7200,43518:9180,43523:12960,34760:12960,34761:12960,34759:12960,45932:15000,65499:19200",
 	["Consumable.Food.Combo Percent"]="21537:100,20388:75,20389:75,20390:75,21215:100",
 	["Consumable.Food.Percent.Basic"]="19696:50,19994:50,19995:50,21235:50,19996:50",
 	["Consumable.Food.Percent.Bonus"]="20516:48,21254:48,44791:50",
@@ -230,7 +231,7 @@ LibStub("LibPeriodicTable-3.1"):AddData("Consumable", gsub("$Rev: 266 $", "(%d+)
 	["Consumable.Potion.Recovery.Mana.Tempest Keep"]="32902:2400",
 	["Consumable.Potion.Recovery.Rejuvenation"]="2456:120,11952:425,9144:750,29531:750,18253:1600,22850:2200,34440:2200",
 
-	["Consumable.Scroll"]="954,955,1180,1181,1477,1478,1711,1712,2289,2290,3012,3013,4419,4421,4422,4424,4425,4426,10305,10306,10307,10308,10309,10310,27498,27499,27500,27501,27502,27503,33457,33458,33459,33460,33461,33462,37091,37092,37093,37094,37097,37098,37118,43463,43464,43465,43466,43467,44314,44315,49632",
+	["Consumable.Scroll"]="954,955,1180,1181,1477,1478,1711,1712,2289,2290,3012,3013,4419,4421,4422,4424,4425,4426,10305,10306,10307,10308,10309,10310,27498,27499,27500,27501,27502,27503,33457,33458,33459,33460,33461,33462,37091,37092,37093,37094,37097,37098,37118,43463,43464,43465,43466,43467,44314,44315,49632,49768,63303,63304,63305,63306,63307,67231",
 
 	["Consumable.Leatherworking.Drums"]="m,Consumable.Cooldown.Drums.Drums",
 	["Consumable.Tailor.Net"]="m,Consumable.Cooldown.Drums.Nets",
