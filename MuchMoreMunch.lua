@@ -26,7 +26,10 @@ local PLACEHOLDER_CATEGORIES = {
         "Consumable.Water.Basic",
         "Consumable.Food.Combo Mana",
     },
-    b = {"Consumable.Bandage.Basic"},
+    b = {
+        "Consumable.Bandage.Basic",
+        "MMMunch.mmmExtraBandages",
+    },
 }
 
 local PRESET_MACROS = {
@@ -142,6 +145,10 @@ local defaults = {
 }
 
 local PT = LibStub("LibPeriodicTable-3.1")
+
+-- Add any missing items with a custom set
+-- Remember to add custom set name to PLACEHOLDER_CATEGORIES
+PT:AddData("MMMunch.mmmExtraBandages", "53049:17400,53050:26000,53051:35000")
 
 function MMMunch:OnInitialize()
   -- Code that you want to run when the addon is first loaded goes here.
