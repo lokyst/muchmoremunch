@@ -19,12 +19,14 @@ local PLACEHOLDER_CATEGORIES = {
         "Consumable.Food.Edible.Basic.Conjured",
         "Consumable.Food.Edible.Basic.Non-Conjured",
         "Consumable.Food.Edible.Combo",
+        "MMMunch.mmmExtraFoods",
     },
     mpf = {
         "Consumable.Food.Edible.Combo.Conjured",
         "Consumable.Water.Conjured",
         "Consumable.Water.Basic",
         "Consumable.Food.Combo Mana",
+        "MMMunch.mmmExtraDrinks",
     },
     b = {
         "Consumable.Bandage.Basic",
@@ -149,6 +151,8 @@ local PT = LibStub("LibPeriodicTable-3.1")
 -- Add any missing items with a custom set
 -- Remember to add custom set name to PLACEHOLDER_CATEGORIES
 PT:AddData("MMMunch.mmmExtraBandages", "53049:17400,53050:26000,53051:35000")
+PT:AddData("MMMunch.mmmExtraFoods","58260:67500,58261:96000,58258:67500,58259:96000")
+PT:AddData("MMMunch.mmmExtraDrinks","59029:45000,59230:45000,63251:96000,58257:96000")
 
 function MMMunch:OnInitialize()
   -- Code that you want to run when the addon is first loaded goes here.
