@@ -150,7 +150,7 @@ local PT = LibStub("LibPeriodicTable-3.1")
 
 -- Add any missing items with a custom set
 -- Remember to add custom set name to PLACEHOLDER_CATEGORIES
-PT:AddData("MMMunch.mmmExtraBandages", "53049:17400,53050:26000,53051:35000")
+PT:AddData("MMMunch.mmmExtraBandages", "")
 PT:AddData("MMMunch.mmmExtraFoods","58260:67500,58261:96000,58258:67500,58259:96000")
 PT:AddData("MMMunch.mmmExtraDrinks","59029:45000,59230:45000,63251:96000,58257:96000")
 
@@ -260,8 +260,8 @@ function MMMunch:FindBestItem(item, best, itemType)
         local itemValue = item.setValues[itemType]
         local bestValue = best.setValues[itemType]
 
-        if (itemValue > bestValue)
-            or (itemValue == bestValue and item.isConjured and not(best.isConjured))
+        --[[if (itemValue > bestValue)
+        -    or (itemValue == bestValue and item.isConjured and not(best.isConjured))
             or ((itemValue == bestValue) and (best.isCombo) and (not item.isCombo) and (not best.isConjured))
             or ((itemValue == bestValue) and (item.count < best.count)
                 and ((item.isConjured == best.isConjured) and (item.isCombo == best.isCombo)))
@@ -269,7 +269,80 @@ function MMMunch:FindBestItem(item, best, itemType)
 
             best = item
         end
+        --]]
 
+        -- Short Circuits
+        if itemValue > bestValue then
+            return item.itemID
+        end
+
+        if itemValue < bestValue then
+            return best.itemID
+        end
+
+        -- Everything that gets here is same as best
+        -- Check other priorities
+        -- 1. Item is conjured
+        -- 2. Item is not combo
+        -- 3. Item has lower stackcount
+
+        if item.isConjured then
+            if not best.isConjured then
+                return item.itemID
+            else
+                if not item.isCombo then
+                    if best.isCombo then
+                        return item.itemID
+                    else
+                        -- Check stack count
+                        if item.count < best.count then
+                            return item.itemID
+                        else
+                            return best.itemID
+                        end
+                    end
+                else
+                    if not best.isCombo then
+                        return best.itemID
+                    else
+                        -- Check stack count
+                        if item.count < best.count then
+                            return item.itemID
+                        else
+                            return best.itemID
+                        end
+                    end
+                end
+            end
+        else
+            if best.isConjured then
+                return best.itemID
+            else
+                if not item.isCombo then
+                    if best.isCombo then
+                        return item.itemID
+                    else
+                        -- Check stack count
+                        if item.count < best.count then
+                            return item.itemID
+                        else
+                            return best.itemID
+                        end
+                    end
+                else
+                    if not best.isCombo then
+                        return best.itemID
+                    else
+                        -- Check stack count
+                        if item.count < best.count then
+                            return item.itemID
+                        else
+                            return best.itemID
+                        end
+                    end
+                end
+            end
+        end
     end
 
     return best.itemID
