@@ -1,4 +1,4 @@
-## Interface: 40000
+## Interface: 40200
 ## Title: MuchMoreMunch
 ## Notes: Generate macros that automatically use the best food available
 ## Author: lokyst
