@@ -230,7 +230,7 @@ LibStub("LibPeriodicTable-3.1"):AddData("Consumable", gsub("$Rev: 373 $", "(%d+)
 	["Consumable.Potion.Recovery.Healing.Tempest Keep"]="32905:2000",
 	["Consumable.Potion.Recovery.Healing.PvP"]="17349:640,17348:1120",
 	["Consumable.Potion.Recovery.Mana.Anywhere"]="43570:500",
-	["Consumable.Potion.Recovery.Mana.Basic"]="2455:160,3385:320,35287:470,3827:520,6149:800,13443:1200,18841:1200,13444:1800,31840:1800,31841:1800,31854:1800,31855:1800,28101:1800,33093:2400,23823:2400,22832:2400,32948:2400,33935:2400,31677:3200,42545:4300,33448:4300,51792:10000",
+	["Consumable.Potion.Recovery.Mana.Basic"]="2455:160,3385:320,35287:470,3827:520,6149:800,13443:1200,18841:1200,13444:1800,31840:1800,31841:1800,31854:1800,31855:1800,28101:1800,33093:2400,23823:2400,22832:2400,32948:2400,33935:2400,31677:3200,42545:4300,33448:4300,57192:10000",
 	["Consumable.Potion.Recovery.Mana.Blades Edge"]="32909:2400,32783:2400",
 	["Consumable.Potion.Recovery.Mana.Coilfang"]="32903:2400",
 	["Consumable.Potion.Recovery.Mana.Pvp"]="17351:1120,17352:640",
