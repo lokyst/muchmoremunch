@@ -6,11 +6,13 @@ local PLACEHOLDER_CATEGORIES = {
         "Consumable.Potion.Recovery.Healing.Basic",
         "Consumable.Potion.Recovery.Rejuvenation",
         "Consumable.Potion.Recovery.Health.Anywhere",
+        "MMMunch.mmmExtraHealthPots",
     },
     mpp = {
         "Consumable.Potion.Recovery.Mana.Basic",
         "Consumable.Potion.Recovery.Rejuvenation",
         "Consumable.Potion.Recovery.Mana.Anywhere",
+        "MMMunch.mmmExtraManaPots",
     },
     hps = {"Consumable.Warlock.Healthstone"},
     mps = {"Consumable.Cooldown.Stone.Mana.Mana Stone"},
@@ -153,6 +155,8 @@ local PT = LibStub("LibPeriodicTable-3.1")
 PT:AddData("MMMunch.mmmExtraBandages", "")
 PT:AddData("MMMunch.mmmExtraFoods","58260:67500,58261:96000,58258:67500,58259:96000")
 PT:AddData("MMMunch.mmmExtraDrinks","59029:45000,59230:45000,63251:96000,58257:96000")
+PT:AddData("MMMunch.mmmExtraHealthPots","89640:120000")
+PT:AddData("MMMunch.mmmExtraManaPots","89641:30000")
 
 function MMMunch:OnInitialize()
   -- Code that you want to run when the addon is first loaded goes here.
