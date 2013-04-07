@@ -239,6 +239,16 @@ function MMMunch:ItemIdFromLink(itemLink)
     return nil
 end
 
+function MMMunch:UpdatePercentageBasedItems()
+    local maxHealth = UnitHealthMax("player")
+    local maxPower = UnitPowerMax("player", "mana")
+    local mana = math.floor(maxPower*0.15)
+
+    -- Override current fixed value with scaling value
+    PT:AddData("Consumable.Warlock.Healthstone", "5512:" .. math.floor(maxHealth*0.2))
+    PT:AddData("Consumable.Cooldown.Stone.Mana.Mana Stone", "36799:" .. mana .. ",81901:".. mana)
+end
+
 function MMMunch:CreateSubTable(itemList)
     local subTable = {}
 
@@ -402,6 +412,7 @@ end
 
 function MMMunch:UpdateAll()
     local itemList = self:BagScan()
+    self:UpdatePercentageBasedItems()
     self.subTable = self:CreateSubTable(itemList)
     self:UpdateBlizzMacros()
     self:UpdateDisplayedMacro()
