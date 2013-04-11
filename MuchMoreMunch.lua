@@ -265,11 +265,65 @@ end
 function MMMunch:UpdatePercentageBasedItems()
     local maxHealth = UnitHealthMax("player")
     local maxPower = UnitPowerMax("player", "mana")
+    local playerLevel = UnitLevel("player")
     local mana = math.floor(maxPower*0.15)
 
+    -- Winter veil cookies
+    -- From wowpedia
+    local hpByLevel = {
+        {90, 298,800},
+        {85, 99,600},
+        {80, 17,928},
+        {70, 8,766},
+        {60, 4,380},
+        {50, 3,343},
+        {40, 2,292},
+        {30, 1,263},
+        {20, 894},
+        {10, 348},
+    }
+    --[[
+        Stats (Y)
+        86 - 90 = 108
+        81 - 85 = 27
+        80 =
+        70 =
+        60 =
+        50 =
+        40 = 5
+        20 = 5
+        10 = 4
+    --]]
+    local subValue = 0
+    for i, v in ipairs(hpByLevel) do
+        if v[1] <= playerLevel then
+            subValue = v[2]
+            break
+        end
+    end
+
     -- Override current fixed value with scaling value
-    PT:AddData("Consumable.Warlock.Healthstone", "5512:" .. math.floor(maxHealth*0.2))
-    PT:AddData("Consumable.Cooldown.Stone.Mana.Mana Stone", "36799:" .. mana .. ",81901:".. mana)
+    local ptString = ""
+    ptString = PT:GetSetString("MMM.Consumable.Food.Buff.Combo.Non-Conjured")
+    ptString = string.gsub(ptString, "21254:%d+", "21254:" .. subValue) -- Winter Veil Cookie
+    ptString = string.gsub(ptString, "46691:%d+", "46691:" .. subValue) -- Bread of the Dead
+    PT:AddData("MMM.Consumable.Food.Buff.Combo.Non-Conjured", ptString)
+
+    ptString = PT:GetSetString("MMM.Consumable.Food.Buff.Combo.Non-Conjured.Mana")
+    ptString = string.gsub(ptString, "21254:%d+", "21254:" .. subValue) -- Winter Veil Cookie
+    ptString = string.gsub(ptString, "46691:%d+", "46691:" .. subValue) -- Bread of the Dead
+    PT:AddData("MMM.Consumable.Food.Buff.Combo.Non-Conjured.Mana", ptString)
+
+    subValue = math.floor(maxHealth*0.2)
+    ptString = PT:GetSetString("Consumable.Warlock.Healthstone")
+    ptString = string.gsub(ptString, "5512:%d+", "5512:" .. subValue) -- basic healthstone
+    PT:AddData("Consumable.Warlock.Healthstone", ptString)
+
+    subValue = math.floor(maxPower*0.15)
+    ptString = PT:GetSetString("Consumable.Cooldown.Stone.Mana.Mana Stone")
+    ptString = string.gsub(ptString, "36799:%d+", "36799:" .. subValue) -- basic mana gem
+    ptString = string.gsub(ptString, "81901:%d+", "81901:" .. subValue) -- glyphed mana gem
+    PT:AddData("Consumable.Cooldown.Stone.Mana.Mana Stone", ptString)
 end
 
 function MMMunch:CreateSubTable(itemList)
@@ -505,8 +559,9 @@ function MMMunch:BagScan()
 end
 
 function MMMunch:UpdateAll()
-    local itemList = self:BagScan()
     self:UpdatePercentageBasedItems()
+
+    local itemList = self:BagScan()
     self.subTable = self:CreateSubTable(itemList)
     self:UpdateBlizzMacros()
     self:UpdateDisplayedMacro()
