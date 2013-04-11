@@ -351,17 +351,6 @@ function MMMunch:FindBestItem(item, best, itemType)
         local itemValue = item.setValues[itemType]
         local bestValue = best.setValues[itemType]
 
-        --[[if (itemValue > bestValue)
-        -    or (itemValue == bestValue and item.isConjured and not(best.isConjured))
-            or ((itemValue == bestValue) and (best.isCombo) and (not item.isCombo) and (not best.isConjured))
-            or ((itemValue == bestValue) and (item.count < best.count)
-                and ((item.isConjured == best.isConjured) and (item.isCombo == best.isCombo)))
-            then
-
-            best = item
-        end
-        --]]
-
         -- Short Circuits
         if itemValue > bestValue then
             return item.itemID
