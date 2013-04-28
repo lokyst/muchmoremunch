@@ -55,6 +55,27 @@ local PRESET_MACROS = {
     ["mAllMP"] = "#showtooltip\n/use [nomod,nocombat] <mpf>\n/castsequence [nomod,combat] reset=combat <mps,mpp>",
 }
 
+local buffList = {
+    ["None"] = "None",
+    ["Agility"] = "Agility",
+    ["Attack Power"] = "Attack Power",
+    ["Critical Rating"]= "Critical Rating",
+    ["Dodge"] = "Dodge",
+    ["Expertise"] = "Expertise",
+    ["Haste Rating"] = "Haste Rating",
+    ["Healing"] = "Healing",
+    ["Hit Rating"] = "Hit Rating",
+    ["HP Regen"] = "HP Regen",
+    ["Intellect"] = "Intellect",
+    ["Mana Regen"] = "Mana Regen",
+    ["Mastery"] = "Mastery",
+    ["Parry"] = "Parry",
+    ["Spell Damage"] = "Spell Damage",
+    ["Spirit"] = "Spirit",
+    ["Stamina"] = "Stamina",
+    ["Strength"] = "Strength",
+}
+
 local options = {
     name = "MuchMoreMunch",
     handler = MMMunch,
@@ -147,12 +168,55 @@ local options = {
             },
         },
 
+        buffPreferences = {
+            name = 'Buff Preferences',
+            type = 'group',
+            args = {
+                buffSelectBox1 = {
+                    name = 'Primary Buff',
+                    type = 'select',
+                    desc = 'Select Buff 1',
+                    set = 'SetBuff1',
+                    get = 'GetBuff1',
+                    style = 'dropdown',
+                    values = buffList,
+                    width = full,
+                    order = 10,
+                },
+
+                buffSelectBox2 = {
+                    name = 'Secondary Buff',
+                    type = 'select',
+                    desc = 'Select Buff 2',
+                    set = 'SetBuff2',
+                    get = 'GetBuff2',
+                    style = 'dropdown',
+                    values = buffList,
+                    width = full,
+                    order = 20,
+                },
+
+                buffSelectBox3 = {
+                    name = 'Tertiary Buff',
+                    type = 'select',
+                    desc = 'Select Buff 3',
+                    set = 'SetBuff3',
+                    get = 'GetBuff3',
+                    style = 'dropdown',
+                    values = buffList,
+                    width = full,
+                    order = 30,
+                },
+
+            },
+        },
     },
 }
 
 local defaults = {
     profile = {
         macroTable = {},
+        buffPriority = {"None", "None", "None"}
     },
 }
 
@@ -210,6 +274,7 @@ function MMMunch:OnInitialize()
     -- Create Interface Config Options
     local ACD = LibStub("AceConfigDialog-3.0")
     ACD:AddToBlizOptions("MMMunch", "MuchMoreMunch", nil, "general")
+    ACD:AddToBlizOptions("MMMunch", "Buff Preferences", "MuchMoreMunch", "buffPreferences")
     ACD:AddToBlizOptions("MMMunch", L["Profile"], "MuchMoreMunch", "profile")
 
     self:RegisterChatCommand("mmm", function() InterfaceOptionsFrame_OpenToCategory("MuchMoreMunch") end)
@@ -401,6 +466,19 @@ function MMMunch:GetWeight(item)
     return sum
 end
 
+function MMMunch:GetBuffWeight(item)
+    local sum = 0
+    local priorityList = self.db.profile.buffPriority
+
+    for i, buffType in ipairs(priorityList) do
+        local weight = math.pow(10, #priorityList - i)
+        local x = item.buffs[buffType] or 0
+        sum = sum + x * weight
+    end
+
+    return sum
+end
+
 function MMMunch:BagScan()
     local itemList = {}
     local playerLevel = UnitLevel("player")
@@ -425,16 +503,29 @@ function MMMunch:BagScan()
                                 if item == nil then
                                     -- create the item object
                                     item = {
+                                        name = GetItemInfo(itemID),
                                         itemID = itemID,
                                         setValues = {[placeholder] = tonumber(value)},
                                         count = count,
                                         isConjured = self:IsConjuredCategory(set),
                                         isCombo = self:IsComboCategory(set),
                                         isBuff = self:IsBuffCategory(set),
+                                        buffs = {},
                                     }
+
+                                    for buffType, _ in pairs(buffList) do
+                                        local bvalue = PT:ItemInSet(itemID, "Consumable.Food.Buff." .. buffType)
+                                        if bvalue then
+                                            item.buffs[buffType] = tonumber(bvalue)
+                                            --print(item.name ..": " .. buffType .. " = " .. tonumber(bvalue))
+                                        end
+                                    end
+
                                     item.weight = self:GetWeight(item)
+                                    item.buffWeight = self:GetBuffWeight(item)
+                                    print(item.name .. ": " .. item.buffWeight)
+
                                     itemList[itemID] = item
-                                    local tempname = GetItemInfo(item.itemID)
                                 else
                                     -- add this set and its value to the item object
                                     item.setValues[placeholder] = tonumber(value)
@@ -585,6 +676,32 @@ function MMMunch:GetMacroListKeyByName(name)
     return index
 end
 
+function MMMunch:GetBuff1(info)
+    return self.db.profile.buffPriority[1]
+end
+
+function MMMunch:SetBuff1(info, key)
+    self.db.profile.buffPriority[1] = options.args.buffPreferences.args.buffSelectBox1.values[key]
+    self:BagScan()
+end
+
+function MMMunch:GetBuff2(info)
+    return self.db.profile.buffPriority[2]
+end
+
+function MMMunch:SetBuff2(info, key)
+    self.db.profile.buffPriority[2] = options.args.buffPreferences.args.buffSelectBox2.values[key]
+    self:BagScan()
+end
+
+function MMMunch:GetBuff3(info)
+    return self.db.profile.buffPriority[3]
+end
+
+function MMMunch:SetBuff3(info, key)
+    self.db.profile.buffPriority[3] = options.args.buffPreferences.args.buffSelectBox3.values[key]
+    self:BagScan()
+end
 
 
 -- Macro Processing
