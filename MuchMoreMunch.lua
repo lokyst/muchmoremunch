@@ -367,134 +367,38 @@ function MMMunch:FindBestItem(item, best, itemType)
         -- 3. Item is not combo
         -- 4. Item has lower stackcount
 
-        if item.isConjured then
-            if not best.isConjured then
+        if item.weight > best.weight then
+            return item.itemID
+        elseif item.weight < best.weight then
+            return best.itemID
+        else
+            if item.count < best.count then
                 return item.itemID
             else
-                if not item.isBuff then
-                    if best.isBuff then
-                        return item.itemID
-                    else
-                        if not item.isCombo then
-                            if best.isCombo then
-                                return item.itemID
-                            else
-                                -- Check stack count
-                                if item.count < best.count then
-                                    return item.itemID
-                                else
-                                    return best.itemID
-                                end
-                            end
-                        else
-                            if not best.isCombo then
-                                return best.itemID
-                            else
-                                -- Check stack count
-                                if item.count < best.count then
-                                    return item.itemID
-                                else
-                                    return best.itemID
-                                end
-                            end
-                        end
-                    end
-                else
-                    if not best.isBuff then
-                        return best.itemID
-                    else
-                        if not item.isCombo then
-                            if best.isCombo then
-                                return item.itemID
-                            else
-                                -- Check stack count
-                                if item.count < best.count then
-                                    return item.itemID
-                                else
-                                    return best.itemID
-                                end
-                            end
-                        else
-                            if not best.isCombo then
-                                return best.itemID
-                            else
-                                -- Check stack count
-                                if item.count < best.count then
-                                    return item.itemID
-                                else
-                                    return best.itemID
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-        else
-            if best.isConjured then
                 return best.itemID
-            else
-                if not item.isBuff then
-                    if best.isBuff then
-                        return item.itemID
-                    else
-                        if not item.isCombo then
-                            if best.isCombo then
-                                return item.itemID
-                            else
-                                -- Check stack count
-                                if item.count < best.count then
-                                    return item.itemID
-                                else
-                                    return best.itemID
-                                end
-                            end
-                        else
-                            if not best.isCombo then
-                                return best.itemID
-                            else
-                                -- Check stack count
-                                if item.count < best.count then
-                                    return item.itemID
-                                else
-                                    return best.itemID
-                                end
-                            end
-                        end
-                    end
-                else
-                    if not best.isBuff then
-                        return best.itemID
-                    else
-                        if not item.isCombo then
-                            if best.isCombo then
-                                return item.itemID
-                            else
-                                -- Check stack count
-                                if item.count < best.count then
-                                    return item.itemID
-                                else
-                                    return best.itemID
-                                end
-                            end
-                        else
-                            if not best.isCombo then
-                                return best.itemID
-                            else
-                                -- Check stack count
-                                if item.count < best.count then
-                                    return item.itemID
-                                else
-                                    return best.itemID
-                                end
-                            end
-                        end
-                    end
-                end
             end
         end
     end
 
     return best.itemID
+end
+
+local PriorityList = {
+    function(item) return item.isConjured end,
+    function(item) return not item.isCombo end,
+    function(item) return not item.isBuff end,
+}
+
+function MMMunch:GetWeight(item)
+    local sum = 0
+
+    for i, func in ipairs(PriorityList) do
+        local weight = math.pow(10, #PriorityList - i)
+        local x = func(item) and 1 or 0
+        sum = sum + x * weight
+    end
+
+    return sum
 end
 
 function MMMunch:BagScan()
@@ -528,13 +432,16 @@ function MMMunch:BagScan()
                                         isCombo = self:IsComboCategory(set),
                                         isBuff = self:IsBuffCategory(set),
                                     }
+                                    item.weight = self:GetWeight(item)
                                     itemList[itemID] = item
+                                    local tempname = GetItemInfo(item.itemID)
                                 else
                                     -- add this set and its value to the item object
                                     item.setValues[placeholder] = tonumber(value)
                                     item.isConjured = item.isConjured or self:IsConjuredCategory(set)
                                     item.isCombo = item.isCombo or self:IsComboCategory(set)
                                     item.isBuff = item.isBuff or self:IsBuffCategory(set)
+                                    item.weight = self:GetWeight(item)
                                 end
                             end
                         end
