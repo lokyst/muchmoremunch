@@ -172,6 +172,18 @@ local options = {
             name = 'Buff Preferences',
             type = 'group',
             args = {
+
+                maintainWellFed = {
+                    name = 'Maintain Well Fed Buff',
+                    type = 'toggle',
+                    desc = 'Prioritize buff food when no Well Fed buff is present',
+                    set = 'SetMaintainWellFed',
+                    get = 'GetMaintainWellFed',
+                    width = 'full',
+                    order = 1,
+                },
+
+
                 buffSelectBox1 = {
                     name = 'Primary Buff',
                     type = 'select',
@@ -180,7 +192,6 @@ local options = {
                     get = 'GetBuff1',
                     style = 'dropdown',
                     values = buffList,
-                    width = full,
                     order = 10,
                 },
 
@@ -192,7 +203,6 @@ local options = {
                     get = 'GetBuff2',
                     style = 'dropdown',
                     values = buffList,
-                    width = full,
                     order = 20,
                 },
 
@@ -204,7 +214,6 @@ local options = {
                     get = 'GetBuff3',
                     style = 'dropdown',
                     values = buffList,
-                    width = full,
                     order = 30,
                 },
 
@@ -216,7 +225,8 @@ local options = {
 local defaults = {
     profile = {
         macroTable = {},
-        buffPriority = {"None", "None", "None"}
+        buffPriority = {"None", "None", "None"},
+        maintainWellFed = false,
     },
 }
 
@@ -471,7 +481,7 @@ end
 local function NeedsBuff(item)
     local wellFed = UnitBuff("player", "Well Fed")
 
-    if wellFed then
+    if wellFed or not MMMunch.db.profile.maintainWellFed then
         return false
     end
 
@@ -736,6 +746,16 @@ end
 
 function MMMunch:SetBuff3(info, key)
     self.db.profile.buffPriority[3] = options.args.buffPreferences.args.buffSelectBox3.values[key]
+    self:UpdateAll()
+end
+
+
+function MMMunch:GetMaintainWellFed(info)
+    return self.db.profile.maintainWellFed
+end
+
+function MMMunch:SetMaintainWellFed(info, key)
+    self.db.profile.maintainWellFed = not self.db.profile.maintainWellFed
     self:UpdateAll()
 end
 
