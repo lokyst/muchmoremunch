@@ -454,7 +454,23 @@ function MMMunch:FindBestItem(item, best, itemType)
     return best.itemID
 end
 
+local function NeedsBuff(item)
+    local wellFed = UnitBuff("player", "Well Fed")
+
+    if wellFed then
+        return false
+    end
+
+    if item.isBuff and not wellFed then
+        print("Need buff from " ..item.name)
+        return true
+    end
+
+    return false
+end
+
 local PriorityList = {
+    NeedsBuff,
     function(item) return item.isConjured end,
     function(item) return not item.isCombo end,
     function(item) return not item.isBuff end,
@@ -523,13 +539,14 @@ function MMMunch:BagScan()
                                         local bvalue = PT:ItemInSet(itemID, "Consumable.Food.Buff." .. buffType)
                                         if bvalue then
                                             item.buffs[buffType] = tonumber(bvalue)
-                                            --print(item.name ..": " .. buffType .. " = " .. tonumber(bvalue))
+                                            print(item.name ..": " .. buffType .. " = " .. tonumber(bvalue))
                                         end
                                     end
 
                                     item.weight = self:GetWeight(item)
+                                    print(item.name .. ": " .. item.weight)
                                     item.buffWeight = self:GetBuffWeight(item)
-                                    print(item.name .. ": " .. item.buffWeight)
+                                    --print(item.name .. ": " .. item.buffWeight)
 
                                     itemList[itemID] = item
                                 else
