@@ -437,10 +437,16 @@ function MMMunch:FindBestItem(item, best, itemType)
         elseif item.weight < best.weight then
             return best.itemID
         else
-            if item.count < best.count then
+            if item.buffWeight > best.buffWeight then
                 return item.itemID
-            else
+            elseif item.buffWeight < best.buffWeight then
                 return best.itemID
+            else
+                if item.count < best.count then
+                    return item.itemID
+                else
+                    return best.itemID
+                end
             end
         end
     end
@@ -682,7 +688,7 @@ end
 
 function MMMunch:SetBuff1(info, key)
     self.db.profile.buffPriority[1] = options.args.buffPreferences.args.buffSelectBox1.values[key]
-    self:BagScan()
+    self:UpdateAll()
 end
 
 function MMMunch:GetBuff2(info)
@@ -691,7 +697,7 @@ end
 
 function MMMunch:SetBuff2(info, key)
     self.db.profile.buffPriority[2] = options.args.buffPreferences.args.buffSelectBox2.values[key]
-    self:BagScan()
+    self:UpdateAll()
 end
 
 function MMMunch:GetBuff3(info)
@@ -700,7 +706,7 @@ end
 
 function MMMunch:SetBuff3(info, key)
     self.db.profile.buffPriority[3] = options.args.buffPreferences.args.buffSelectBox3.values[key]
-    self:BagScan()
+    self:UpdateAll()
 end
 
 
