@@ -265,6 +265,7 @@ function MMMunch:OnInitialize()
     self:RegisterEvent("PLAYER_REGEN_DISABLED", "OnPlayerEnterCombat")
     self:RegisterEvent("PLAYER_REGEN_ENABLED", "OnPlayerLeaveCombat")
     self:RegisterBucketEvent("BAG_UPDATE", 0.5, "OnBagUpdate")
+    self:RegisterBucketEvent("UNIT_AURA", 0.5, "OnUnitAuraChanged")
 
     self.db.RegisterCallback(self, "OnNewProfile", "InitializePresets")
     self.db.RegisterCallback(self, "OnProfileReset", "InitializePresets")
@@ -309,6 +310,19 @@ function MMMunch:OnPlayerLeaveCombat()
 end
 
 function MMMunch:OnBagUpdate()
+    if not self.inCombat then
+        self:UpdateAll()
+    else
+        self.delayedMacroUpdate = true
+    end
+end
+
+function MMMunch:OnUnitAuraChanged(...)
+    local args = ...
+    local unitID = args[1]
+
+    if not unitID == "player" then return end
+
     if not self.inCombat then
         self:UpdateAll()
     else
@@ -462,7 +476,6 @@ local function NeedsBuff(item)
     end
 
     if item.isBuff and not wellFed then
-        print("Need buff from " ..item.name)
         return true
     end
 
@@ -539,12 +552,12 @@ function MMMunch:BagScan()
                                         local bvalue = PT:ItemInSet(itemID, "Consumable.Food.Buff." .. buffType)
                                         if bvalue then
                                             item.buffs[buffType] = tonumber(bvalue)
-                                            print(item.name ..": " .. buffType .. " = " .. tonumber(bvalue))
+                                            --print(item.name ..": " .. buffType .. " = " .. tonumber(bvalue))
                                         end
                                     end
 
                                     item.weight = self:GetWeight(item)
-                                    print(item.name .. ": " .. item.weight)
+                                    --print(item.name .. ": " .. item.weight)
                                     item.buffWeight = self:GetBuffWeight(item)
                                     --print(item.name .. ": " .. item.buffWeight)
 
