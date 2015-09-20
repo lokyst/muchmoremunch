@@ -76,6 +76,15 @@ local buffList = {
     ["Strength"] = "Strength",
 }
 
+local itemTypeList = {
+    ["None"] = "None",
+    ["Health Potion"] = "Health Potion",
+    ["Mana Potion"] = "Mana Potion",
+    ["Health Food"] = "Health Food",
+    ["Mana Food"] = "Mana Food",
+    ["Bandage"] = "Bandage",
+}
+
 local options = {
     name = "MuchMoreMunch",
     handler = MMMunch,
@@ -219,6 +228,66 @@ local options = {
 
             },
         },
+
+        userAddedItems = {
+            name = 'User Added Items',
+            type = 'group',
+            args = {
+
+                itemTypeSelectBox = {
+                    name = 'Item Type',
+                    type = 'select',
+                    desc = 'Select Item Type',
+                    set = 'SetAddItemType',
+                    get = 'GetAddItemType',
+                    style = 'dropdown',
+                    values = itemTypeList,
+                    order = 30,
+                },
+
+                itemIsConjured = {
+                    name = 'Conjured Item',
+                    type = 'toggle',
+                    desc = 'Item is conjured',
+                    set = 'SetConjuredItem',
+                    get = 'GetConjuredItem',
+                    --width = 'full',
+                    order = 40,
+                },
+
+                itemID = {
+                    name = 'Item ID',
+                    type = 'input',
+                    desc = 'Item ID as obtained from WowHead or some siimilar database',
+                    set = 'SetItemId',
+                    get = 'GetItemId',
+                    --width = 'half',
+                    order = 10,
+                },
+
+                itemValue = {
+                    name = 'Item Value',
+                    type = 'input',
+                    desc = 'How much HP, MP or points the item returns',
+                    set = 'SetItemValue',
+                    get = 'GetItemValue',
+                    --width = 'half',
+                    order = 20,
+                },
+
+                addItemButton = {
+                    name = 'Add Item',
+                    type = 'execute',
+                    desc = 'Adds the new item to the selected category',
+                    func = 'CreateItem',
+                    order = 110,
+                    width = 'full',
+                },
+
+
+            },
+        },
+
     },
 }
 
@@ -227,6 +296,11 @@ local defaults = {
         macroTable = {},
         buffPriority = {"None", "None", "None"},
         maintainWellFed = false,
+        ["Health Potion"] = {},
+        ["Mana Potion"] = {},
+        ["Health Food"] = {},
+        ["Mana Food"] = {},
+        ["Bandage"] = {},
     },
 }
 
@@ -286,6 +360,7 @@ function MMMunch:OnInitialize()
     local ACD = LibStub("AceConfigDialog-3.0")
     ACD:AddToBlizOptions("MMMunch", "MuchMoreMunch", nil, "general")
     ACD:AddToBlizOptions("MMMunch", "Buff Preferences", "MuchMoreMunch", "buffPreferences")
+    ACD:AddToBlizOptions("MMMunch", "User Added Items", "MuchMoreMunch", "userAddedItems")
     ACD:AddToBlizOptions("MMMunch", L["Profile"], "MuchMoreMunch", "profile")
 
     self:RegisterChatCommand("mmm", function() InterfaceOptionsFrame_OpenToCategory("MuchMoreMunch") end)
@@ -758,6 +833,73 @@ function MMMunch:SetMaintainWellFed(info, key)
     self.db.profile.maintainWellFed = not self.db.profile.maintainWellFed
     self:UpdateAll()
 end
+
+function MMMunch:GetAddItemType(info)
+    return self.addItemType or "None"
+end
+
+function MMMunch:SetAddItemType(info, key)
+    self.addItemType = options.args.userAddedItems.args.itemTypeSelectBox.values[key]
+    self:UpdateAll()
+end
+
+function MMMunch:GetConjuredItem(info)
+    if self.itemIsConjured == nil then
+        return false
+    end
+
+    return self.itemIsConjured
+end
+
+function MMMunch:SetConjuredItem(info, key)
+    self.itemIsConjured = not self.itemIsConjured
+    self:UpdateAll()
+end
+
+function MMMunch:GetItemId(info)
+    if self.addItemId == nil then
+        return ""
+    end
+
+    return self.addItemId
+end
+
+function MMMunch:SetItemId(info, key)
+    self.addItemId = strtrim(key)
+    self:UpdateAll()
+end
+
+function MMMunch:GetItemValue(info)
+    if self.addItemValue == nil then
+        return ""
+    end
+
+    return self.addItemValue
+end
+
+function MMMunch:SetItemValue(info, key)
+    self.addItemValue = strtrim(key)
+    self:UpdateAll()
+end
+
+function MMMunch:CreateItem()
+
+    self:Print(self.addItemType);
+    self:Print(self.db.profile[self.addItemType]);
+    self.db.profile[self.addItemType][self.addItemId] = self.addItemValue;
+
+    local myString = ""
+    for k,v in pairs(self.db.profile[self.addItemType]) do
+        if #myString > 0 then
+            myString = myString .. ", ";
+        end
+        myString = myString .. tostring(k) .. ":" .. tostring(v);
+    end
+
+    self:Print(myString)
+end
+
+
 
 
 -- Macro Processing
