@@ -284,7 +284,18 @@ local options = {
                     width = 'full',
                 },
 
-
+                itemDeleteBox = {
+                    name = 'Delete Item',
+                    type = 'select',
+                    desc = 'Select an item to be deleted',
+                    set = 'SetItemDelete',
+                    get = 'GetItemDelete',
+                    style = 'dropdown',
+                    values = {},
+                    order = 140,
+                    confirm = true,
+                    confirmText = 'Are you sure you wish to delete the selected item? This action requires a reloadui to take effect.'
+                },
             },
         },
 
@@ -296,6 +307,7 @@ local defaults = {
         macroTable = {},
         buffPriority = {"None", "None", "None"},
         maintainWellFed = false,
+        itemList = {},
         ["Health Potion"] = {},
         ["Mana Potion"] = {},
         ["Health Food"] = {},
@@ -882,13 +894,23 @@ function MMMunch:SetItemValue(info, key)
     self:UpdateAll()
 end
 
-function MMMunch:CreateItem()
+local itemCategoryLookup = {
+    ["Health Potion"] = "mmmExtraHealthPots",
+    ["Mana Potion"] = "mmmExtraManaPots",
+    ["Health Food"] = "mmmExtraFoods",
+    ["Mana Food"] = "mmmExtraDrinks",
+    ["Bandage"] = "mmmExtraBandages",
+}
 
-    self:Print(self.addItemType);
-    self:Print(self.db.profile[self.addItemType]);
+function MMMunch:CreateItem()
+    if self.addItemId == nil or self.addItemValue == nil or self.addItemType == nil then
+        return false;
+    end
+
+    self.db.profile.itemList[self.addItemId] = self.addItemId;
     self.db.profile[self.addItemType][self.addItemId] = self.addItemValue;
 
-    local myString = ""
+    local myString = "";
     for k,v in pairs(self.db.profile[self.addItemType]) do
         if #myString > 0 then
             myString = myString .. ", ";
@@ -896,11 +918,41 @@ function MMMunch:CreateItem()
         myString = myString .. tostring(k) .. ":" .. tostring(v);
     end
 
-    self:Print(myString)
+    -- What happens if there are repeats?
+    local ptListName = "MMMunch." .. itemCategoryLookup[self.addItemType];
+    PT:AddData(ptListName, myString);
+
+    self:UpdateItemList()
+    return true;
 end
 
+function MMMunch:GetItemDelete(info)
+    return nil;
+end
 
+function MMMunch:SetItemDelete(info, key)
+    local name = options.args.userAddedItems.args.itemDeleteBox.values[key];
+    self.db.profile.itemList[name] = nil;
 
+    -- Remember to delete from each of the sub-tables as well
+    for k, _ in pairs(itemCategoryLookup) do
+        self.db.profile[k][name] = nil;
+
+    end
+
+    self:UpdateItemList()
+end
+
+function MMMunch:UpdateItemList()
+    local itemList = {};
+    for k, v in pairs(self.db.profile.itemList) do
+        table.insert(itemList, k);
+    end
+
+    table.sort(itemList)
+    options.args.userAddedItems.args.itemDeleteBox.values = itemList;
+    self:Print("ItemList Updated")
+end
 
 -- Macro Processing
 function MMMunch:ProcessMacro(body)
