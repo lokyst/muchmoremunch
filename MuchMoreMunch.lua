@@ -14,8 +14,14 @@ local PLACEHOLDER_CATEGORIES = {
         "Consumable.Potion.Recovery.Mana.Anywhere",
         "MMMunch.mmmExtraManaPots",
     },
-    hps = {"Consumable.Warlock.Healthstone"},
-    mps = {"Consumable.Cooldown.Stone.Mana.Mana Stone"},
+    hps = {
+        "Consumable.Warlock.Healthstone",
+        "MMMunch.mmmExtraHealthPots.Conjured",
+    },
+    mps = {
+        "Consumable.Cooldown.Stone.Mana.Mana Stone",
+        "MMMunch.mmmExtraManaPots.Conjured",
+        },
     hpf = {
         "MMM.Consumable.Food.Combo.Conjured", -- conjured + health and mana
         "MMM.Consumable.Food.Basic.Conjured", -- conjured + health
@@ -25,6 +31,7 @@ local PLACEHOLDER_CATEGORIES = {
         "MMM.Consumable.Food.Buff.Basic.Non-Conjured", -- health + buff
         "MMM.Consumable.Food.Combo.Non-Conjured", -- health and mana
         "MMM.Consumable.Food.Basic.Non-Conjured", -- health
+        "MMMunch.mmmExtraFoods.Conjured",
         "MMMunch.mmmExtraFoods",
     },
     mpf = {
@@ -36,10 +43,12 @@ local PLACEHOLDER_CATEGORIES = {
         "MMM.Consumable.Food.Buff.Basic.Non-Conjured.Mana", -- mana + buff
         "MMM.Consumable.Food.Combo.Non-Conjured.Mana", -- health and mana
         "MMM.Consumable.Food.Basic.Non-Conjured.Mana", -- mana
+        "MMMunch.mmmExtraDrinks.Conjured",
         "MMMunch.mmmExtraDrinks",
     },
     b = {
         "Consumable.Bandage.Basic",
+        "MMMunch.mmmExtraBandages.Conjured",
         "MMMunch.mmmExtraBandages",
     },
 }
@@ -379,6 +388,8 @@ function MMMunch:OnInitialize()
     self:RegisterChatCommand("muchmoremunch", function() InterfaceOptionsFrame_OpenToCategory("MuchMoreMunch") end)
 
     -- Populate lists
+    self:RefreshCustomPTLists()
+    self:UpdateItemList()
     self:UpdateMacroList()
 end
 
@@ -902,41 +913,67 @@ local itemCategoryLookup = {
     ["Bandage"] = "mmmExtraBandages",
 }
 
+function MMMunch:RefreshCustomPTLists()
+    for category, _ in pairs(itemCategoryLookup) do
+        local myStringNonConjured = ""
+        local myStringConjured = ""
+        local myString
+        local ptListName = "MMMunch." .. itemCategoryLookup[category]
+
+        for k, v in pairs(self.db.profile[category]) do
+            if v[2] then
+                myString = myStringConjured
+            else
+                myString = myStringNonConjured
+            end
+
+            if #myString > 0 then
+                myString = myString .. ", "
+            end
+            myString = myString .. tostring(k) .. ":" .. tostring(v[1])
+
+            if v[2] then
+                myStringConjured = myString
+            else
+                myStringNonConjured = myString
+            end
+        end
+
+
+        --self:Print(ptListName .. ":" .. myStringNonConjured)
+        --self:Print(ptListName .. ".Conjured:" .. myStringConjured)
+
+        PT:AddData(ptListName, myStringNonConjured)
+        PT:AddData(ptListName .. ".Conjured", myStringConjured)
+
+    end
+end
+
 function MMMunch:CreateItem()
     if self.addItemId == nil or self.addItemValue == nil or self.addItemType == nil then
-        return false;
+        return false
     end
 
-    self.db.profile.itemList[self.addItemId] = self.addItemId;
-    self.db.profile[self.addItemType][self.addItemId] = self.addItemValue;
+    self.db.profile.itemList[self.addItemId] = self.addItemId
+    self.db.profile[self.addItemType][self.addItemId] = {self.addItemValue, self.itemIsConjured}
 
-    local myString = "";
-    for k,v in pairs(self.db.profile[self.addItemType]) do
-        if #myString > 0 then
-            myString = myString .. ", ";
-        end
-        myString = myString .. tostring(k) .. ":" .. tostring(v);
-    end
-
-    -- What happens if there are repeats?
-    local ptListName = "MMMunch." .. itemCategoryLookup[self.addItemType];
-    PT:AddData(ptListName, myString);
+    self:RefreshCustomPTLists()
 
     self:UpdateItemList()
-    return true;
+    return true
 end
 
 function MMMunch:GetItemDelete(info)
-    return nil;
+    return nil
 end
 
 function MMMunch:SetItemDelete(info, key)
-    local name = options.args.userAddedItems.args.itemDeleteBox.values[key];
-    self.db.profile.itemList[name] = nil;
+    local name = options.args.userAddedItems.args.itemDeleteBox.values[key]
+    self.db.profile.itemList[name] = nil
 
     -- Remember to delete from each of the sub-tables as well
     for k, _ in pairs(itemCategoryLookup) do
-        self.db.profile[k][name] = nil;
+        self.db.profile[k][name] = nil
 
     end
 
@@ -944,14 +981,13 @@ function MMMunch:SetItemDelete(info, key)
 end
 
 function MMMunch:UpdateItemList()
-    local itemList = {};
+    local itemList = {}
     for k, v in pairs(self.db.profile.itemList) do
-        table.insert(itemList, k);
+        table.insert(itemList, k)
     end
 
     table.sort(itemList)
-    options.args.userAddedItems.args.itemDeleteBox.values = itemList;
-    self:Print("ItemList Updated")
+    options.args.userAddedItems.args.itemDeleteBox.values = itemList
 end
 
 -- Macro Processing
