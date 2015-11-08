@@ -968,7 +968,12 @@ function MMMunch:CreateItem()
         return false
     end
 
-    self.db.profile.itemList[self.addItemId] = self.addItemId
+    local itemName = GetItemInfo(self.addItemId)
+
+    self.db.profile.itemList[self.addItemId] = {
+        itemID = self.addItemId,
+        name = itemName,
+    }
     self.db.profile[self.addItemType][self.addItemId] = {self.addItemValue, self.itemIsConjured}
 
     self:RefreshCustomPTLists()
@@ -983,21 +988,29 @@ end
 
 function MMMunch:SetItemDelete(info, key)
     local name = options.args.userAddedItems.args.itemDeleteBox.values[key]
-    self.db.profile.itemList[name] = nil
+    local _, itemLink = GetItemInfo(name)
+    local itemId
 
-    -- Remember to delete from each of the sub-tables as well
-    for k, _ in pairs(itemCategoryLookup) do
-        self.db.profile[k][name] = nil
-
+    if itemLink then
+        itemId = tostring(self:ItemIdFromLink(itemLink))
     end
 
-    self:UpdateItemList()
+    if itemId then
+        self.db.profile.itemList[itemId] = nil
+
+        -- Remember to delete from each of the sub-tables as well
+        for k, _ in pairs(itemCategoryLookup) do
+            self.db.profile[k][itemId] = nil
+        end
+
+        self:UpdateItemList()
+    end
 end
 
 function MMMunch:UpdateItemList()
     local itemList = {}
     for k, v in pairs(self.db.profile.itemList) do
-        table.insert(itemList, k)
+        table.insert(itemList, v.name)
     end
 
     table.sort(itemList)
