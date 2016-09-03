@@ -1,8 +1,8 @@
-## Interface: 60200
+## Interface: 70000
 ## Title: MuchMoreMunch
 ## Notes: Generate macros that automatically use the best food available
 ## Author: lokyst
-## Version: 1.7.0
+## Version: 1.7.1
 ## SavedVariables: MMMunchDB
 ## OptionalDeps: LibPeriodicTable-3.1
 ## X-Embeds: LibPeriodicTable-3.1
