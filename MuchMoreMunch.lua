@@ -495,7 +495,7 @@ local MP_CATEGORIES = {
 
 function MMMunch:UpdatePercentageBasedItems()
     local maxHealth = UnitHealthMax("player")
-    local maxPower = UnitPowerMax("player", "mana")
+    local maxPower = UnitPowerMax("player", SPELL_POWER_MANA)
     local playerLevel = UnitLevel("player")
     local mana = math.floor(maxPower*0.15)
 
