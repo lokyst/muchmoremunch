@@ -1,4 +1,4 @@
-﻿## Interface: 70000
+## Interface: 70300
 ## LoadOnDemand: 1
 ## Title: Lib: PeriodicTable-3.1 [|cffeda55fConsumable|r]
 ## Notes: PeriodicTable data module.
@@ -8,9 +8,5 @@
 ## X-Category: Library
 ## X-License: LGPL v2.1
 ## X-PeriodicTable-3.1-Module: Consumable
-## X-Curse-Packaged-Version: r520-release
-## X-Curse-Project-Name: LibPeriodicTable-3.1
-## X-Curse-Project-ID: libperiodictable-3-1
-## X-Curse-Repository-ID: wow/libperiodictable-3-1/mainline
 
 LibPeriodicTable-3.1-Consumable.lua
